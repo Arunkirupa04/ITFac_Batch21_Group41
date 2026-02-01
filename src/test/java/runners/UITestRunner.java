@@ -9,8 +9,8 @@ import io.cucumber.junit.CucumberOptions;
         features = "src/test/resources/features",
         glue = "stepdefinitions.ui",
         plugin = {"pretty", "html:target/cucumber-report.html"},
-        monochrome = true,
-        tags = "@admin_login"  // <-- run only scenarios with this tag
+        monochrome = true
+//        tags = "@admin_login"  // <-- run only scenarios with this tag
 )
 public class UITestRunner {
 }
