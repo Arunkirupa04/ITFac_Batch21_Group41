@@ -15,7 +15,16 @@ public class AdminLoginSteps {
     @Given("admin is on login page")
     public void admin_is_on_login_page() {
         WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
+        
+        // Configure Chrome options for better stability
+        org.openqa.selenium.chrome.ChromeOptions options = new org.openqa.selenium.chrome.ChromeOptions();
+        options.addArguments("--start-maximized");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--remote-allow-origins=*");
+        
+        driver = new ChromeDriver(options);
         driver.get("http://localhost:8080/ui/login");
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));

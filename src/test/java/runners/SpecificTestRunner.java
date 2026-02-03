@@ -8,9 +8,9 @@ import io.cucumber.junit.CucumberOptions;
 @CucumberOptions(
         features = "src/test/resources/features/ui",
         glue = "stepdefinitions.ui",
-        plugin = {"pretty", "html:target/cucumber-report.html", "json:target/cucumber-report.json"},
+        plugin = {"pretty", "html:target/cucumber-report-specific.html", "json:target/cucumber-report-specific.json"},
         monochrome = true,
-        tags = "@admin or @user"  // Run both Admin and User tests
+        tags = "@TC_UI_ADMIN_21"  // Run only TC_UI_ADMIN_21 to test the fix
 )
-public class UITestRunner {
+public class SpecificTestRunner {
 }
