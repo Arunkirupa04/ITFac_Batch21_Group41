@@ -15,8 +15,15 @@ public class AdminSellSteps {
 
     @Given("admin is on the sales page")
     public void admin_is_on_the_sales_page() {
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
+        // Configure Chrome options for better stability
+        org.openqa.selenium.chrome.ChromeOptions options = new org.openqa.selenium.chrome.ChromeOptions();
+        options.addArguments("--start-maximized");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--remote-allow-origins=*");
+        
+        driver = new ChromeDriver(options);
 
         // Open login page
         driver.get("http://localhost:8080/ui/login");

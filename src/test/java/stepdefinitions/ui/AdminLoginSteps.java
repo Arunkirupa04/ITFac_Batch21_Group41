@@ -15,9 +15,17 @@ public class AdminLoginSteps {
     @Given("user is on login page")
     public void user_is_on_login_page() {
         WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
+        
+        // Configure Chrome options for better stability
+        org.openqa.selenium.chrome.ChromeOptions options = new org.openqa.selenium.chrome.ChromeOptions();
+        options.addArguments("--start-maximized");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--remote-allow-origins=*");
+        
+        driver = new ChromeDriver(options);
         driver.get("http://localhost:8080/ui/login");
-        driver.manage().window().maximize();
         // Wait for elements to be available
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         System.out.println("Login page opened ✅");
