@@ -1,8 +1,8 @@
 @UserAPI
-Feature: User API Functionality
+Feature: User Sales Functional Restrictions
   As a standard user
   I want to access sales data according to my read-only permissions
-  And ensure I cannot perform restricted actions like creating or deleting sales
+  So that I cannot perform restricted actions like creating or deleting sales
 
   Background:
     Given user is authenticated via API

@@ -1,8 +1,8 @@
 @AdminAPI
-Feature: Admin API Functionality
+Feature: Admin Plant and Sales Management APIs
   As an admin
-  I want to manage plants and sales via API
-  So that the system correctly processes data and provides accurate information
+  I want to manage plants and sales through secured APIs
+  So that inventory and sales data remain accurate and consistent
 
   Background:
     Given admin is authenticated via API
@@ -22,8 +22,8 @@ Feature: Admin API Functionality
   @TC_API_ADMIN_31
   Scenario: Verify paged and sorted plants as Admin
     When admin sends a GET request to "/api/plants/paged" with parameters:
-      | page | 0       |
-      | size | 10      |
+      | page | 0 |
+      | size | 10 |
       | sort | price,asc |
     Then the response status code should be 200
     And the response should contain paginated plant data
