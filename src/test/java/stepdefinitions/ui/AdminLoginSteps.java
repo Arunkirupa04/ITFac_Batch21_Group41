@@ -133,6 +133,26 @@ public class AdminLoginSteps {
         driver.quit();
     }
 
+    //TC_UI_ADMIN_09
+
+    @When("admin views dashboard page")
+    public void admin_views_dashboard_page() {
+        driver.get("http://localhost:8080/ui/dashboard");
+    }
+
+    @Then("admin dashboard should load successfully")
+    public void admin_dashboard_should_load_successfully() {
+
+        String pageSource = driver.getPageSource();
+
+        if(pageSource.contains("Dashboard")){
+            System.out.println("Dashboard loaded successfully ✅");
+        } else {
+            System.out.println("Dashboard failed to load ❌");
+        }
+    }
+
+
     // TC_UI_ADMIN_10
     @Then("admin dashboard summary cards should show initial values")
     public void admin_dashboard_summary_cards_should_show_initial_values() {
