@@ -60,6 +60,12 @@ Feature: Admin Login & Dashboard Functionality
     When admin navigates to dashboard page
     Then admin should be redirected to login page
 
+  @TC_UI_ADMIN_09
+  Scenario: Dashboard Load After Admin Login
+    Given admin is logged in
+    When admin views dashboard page
+    Then admin dashboard should load successfully
+
   @TC_UI_ADMIN_10
   Scenario: Initial Summary Cards Values
     Given admin is logged in

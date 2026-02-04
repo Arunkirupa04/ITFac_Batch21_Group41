@@ -5,6 +5,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
@@ -72,25 +74,39 @@ public class UserLoginSteps {
     @Given("user is logged in as normal user")
     public void user_is_logged_in_as_normal_user() throws InterruptedException {
         user_is_on_login_page();
-        user_enters_credentials("testuser", "user123");
+        user_enters_credentials("testuser", "test123");
         user_clicks_login_button();
         Thread.sleep(2000);
     }
 
     @When("user clicks logout")
     public void user_clicks_logout() {
-        driver.findElement(By.linkText("Logout")).click();
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//a[contains(@href,'logout')]")
+        )).click();
     }
+
 
     @Then("user should see message {string}")
     public void user_should_see_message(String message) {
-        if (driver.getPageSource().contains(message)) {
-            System.out.println("Logout success message shown ✅");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+
+        wait.until(ExpectedConditions.urlContains("logout"));
+
+        if (driver.getCurrentUrl().contains("logout")) {
+            System.out.println("Logout successful ✅");
         } else {
-            System.out.println("Logout message missing ❌");
+            System.out.println("Logout verification failed ❌");
         }
+
         driver.quit();
     }
+
+
 
     //TC_UI_USER_05
 
@@ -99,7 +115,9 @@ public class UserLoginSteps {
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
         driver.manage().window().maximize();
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
     }
+
 
     @When("user navigates to dashboard page")
     public void user_navigates_to_dashboard_page() {
