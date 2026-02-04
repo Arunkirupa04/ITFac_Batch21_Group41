@@ -12,7 +12,7 @@ Feature: Admin Plant Operations
     Given I try to get a plant with invalid id 999
     When I send a GET request to "/plants/999"
     Then the response status code should be 404
-    And the error message should be "Not found"
+    And the error message should be "Plant not found"
 
   @TC_API_ADMIN_23
   Scenario: Update Plant Success

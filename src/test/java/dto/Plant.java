@@ -1,5 +1,8 @@
 package dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Plant {
     private int id;
     private String name;

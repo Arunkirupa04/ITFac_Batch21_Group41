@@ -2,8 +2,12 @@ package dto;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PlantSummaryDTO {
     private int totalPlants;
+    private int lowStockPlants;
     private double totalValue;
     private List<Plant> plants;
 
@@ -14,6 +18,14 @@ public class PlantSummaryDTO {
 
     public void setTotalPlants(int totalPlants) {
         this.totalPlants = totalPlants;
+    }
+
+    public int getLowStockPlants() {
+        return lowStockPlants;
+    }
+
+    public void setLowStockPlants(int lowStockPlants) {
+        this.lowStockPlants = lowStockPlants;
     }
 
     public double getTotalValue() {

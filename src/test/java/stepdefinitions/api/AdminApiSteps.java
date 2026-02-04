@@ -40,13 +40,6 @@ public class AdminApiSteps extends ApiBase {
         response = request.get(endpoint);
     }
 
-    // Overloaded/Specific step for dynamic ID path if the above string match isn't
-    // perfect for all cases
-    @When("I send a GET request to \"/plants/{int}\"")
-    public void iSendAGETRequestToPlantId(int id) {
-        response = request.get("/plants/" + id);
-    }
-
     @Then("the response status code should be {int}")
     public void theResponseStatusCodeShouldBe(int statusCode) {
         response.then().statusCode(statusCode);
@@ -68,7 +61,7 @@ public class AdminApiSteps extends ApiBase {
         if (actualMessage == null)
             actualMessage = response.getBody().asString();
 
-        Assert.assertTrue("Error message mismatched", actualMessage.contains(expectedMessage));
+        Assert.assertTrue("Error message mismatched: " + actualMessage, actualMessage.contains(expectedMessage));
     }
 
     @Given("I have a valid plant id to update")
@@ -139,7 +132,9 @@ public class AdminApiSteps extends ApiBase {
 
     @When("I send a POST request to create the plant in category {int}")
     public void iSendAPOSTRequestToCreateThePlantInCategory(int catId) {
-        response = request.post("/plants/category/" + catId);
+        plantRequest.setCategoryId(catId);
+        request.body(plantRequest);
+        response = request.post("/plants");
     }
 
     @Then("a new plant should be created")
