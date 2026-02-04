@@ -1,5 +1,8 @@
 @UserAPI
-Feature: User API Access (Readonly)
+Feature: User Authentication and Readonly Access
+  As a standard user
+  I want to log in and access categories safely
+  So that I can only read data without performing restricted actions
 
   @TC_API_USER_01
   Scenario: Successful Test User Login

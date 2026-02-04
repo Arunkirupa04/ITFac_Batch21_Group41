@@ -1,5 +1,8 @@
 @AdminAPI
-Feature: Admin API Authentication and Category Management
+Feature: Admin Authentication and Authorization APIs
+  As an admin
+  I want to authenticate and obtain secure access to the system
+  So that I can safely perform administrative API operations
 
   @TC_API_ADMIN_01
   Scenario: Successful Admin Login and JWT retrieval
@@ -44,7 +47,7 @@ Feature: Admin API Authentication and Category Management
     And response message should contain "JSON parse error"
 
   @TC_API_ADMIN_07
-  Scenario: Retrieve existing category by ID
+  Scenario: Retrieve existing category by ID as Admin
     Given admin is logged in with JWT
     When admin sends GET request to "/api/categories/1"
     Then response code should be 200

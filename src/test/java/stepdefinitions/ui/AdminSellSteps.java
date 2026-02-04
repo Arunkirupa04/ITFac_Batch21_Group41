@@ -158,7 +158,7 @@ public class AdminSellSteps {
         a_sale_exists_in_the_system();
     }
 
-    @Given("user is on the sales page")
+    @Given("the user is on the sales page")
     public void user_is_on_the_sales_page() {
         driver.get("http://localhost:8080/ui/sales");
     }
