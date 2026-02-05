@@ -4,7 +4,7 @@ Feature: Add / Edit Plant - Admin
   Background:
     Given admin is logged in
 
-  @TC_UI_ADMIN_41
+  @ui @plants @admin @TC_UI_ADMIN_41
   Scenario: Valid Plant Data Addition
     Given admin is on add plant page
     When admin enters plant name "Cactus"
@@ -14,12 +14,18 @@ Feature: Add / Edit Plant - Admin
     And admin clicks save plant
     Then plant should be added successfully
 
-  @TC_UI_ADMIN_42
-  Scenario: Valid Sub-Category Selection
-    Given admin is on add plant page
-    When admin selects sub category "Cacti"
-    And admin clicks save plant
-    Then sub category selection should be accepted
+ @ui @plants @admin @TC_UI_ADMIN_42
+ Scenario: Valid Sub-Category Selection
+   Given admin is logged in
+   And admin is on add plant page
+   When admin enters plant name "Cactus"
+   And admin enters plant price "10"
+   And admin enters plant quantity "12"
+   And admin selects category "Indoor"
+   And admin selects sub category "Cacti"
+   And admin clicks save plant
+   Then sub category selection should be accepted
+
 
   @TC_UI_ADMIN_43
   Scenario: Cancel Redirect Check

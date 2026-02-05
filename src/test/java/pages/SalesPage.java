@@ -42,6 +42,7 @@ public class SalesPage {
 
     /**
      * Get the count of sales for a specific plant
+     * 
      * @param plantName The name of the plant
      * @return Number of sales rows for that plant
      */
@@ -63,6 +64,7 @@ public class SalesPage {
 
     /**
      * Get the most recent sale (first row in table)
+     * 
      * @return Array containing [plantName, quantity, totalPrice, soldAt]
      */
     public String[] getMostRecentSale() {
@@ -77,13 +79,14 @@ public class SalesPage {
         String totalPrice = firstRow.findElement(By.xpath("./td[3]")).getText();
         String soldAt = firstRow.findElement(By.xpath("./td[4]")).getText();
 
-        return new String[]{plantName, quantity, totalPrice, soldAt};
+        return new String[] { plantName, quantity, totalPrice, soldAt };
     }
 
     /**
      * Check if a sale with specific plant and quantity exists in the table
+     * 
      * @param plantName Name of the plant
-     * @param quantity Quantity sold
+     * @param quantity  Quantity sold
      * @return true if such a sale exists
      */
     public boolean saleExistsForPlantWithQuantity(String plantName, int quantity) {
@@ -110,5 +113,14 @@ public class SalesPage {
 
     public void clickPreviousPage() {
         driver.findElement(previousPageBtn).click();
+    }
+
+    // ---------- Visibility Checks ----------
+    public boolean isSellButtonVisible() {
+        return driver.findElements(sellPlantButton).size() > 0 && driver.findElement(sellPlantButton).isDisplayed();
+    }
+
+    public boolean isDeleteButtonVisible() {
+        return driver.findElements(By.cssSelector("form[action*='/ui/sales/delete'] button")).size() > 0;
     }
 }

@@ -2,7 +2,6 @@ package pages;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.Select;
-
 import java.util.List;
 
 public class PlantsPage {
@@ -18,34 +17,35 @@ public class PlantsPage {
 
     // Filters
     private By searchPlantInput = By.name("name");
-    private By categorySelect   = By.name("categoryId");
-    private By searchButton     = By.cssSelector("button.btn.btn-primary");
-    private By resetButton      = By.cssSelector("a.btn.btn-outline-secondary");
+    private By categorySelect = By.name("categoryId");
+    private By searchButton = By.cssSelector("button.btn.btn-primary");
+    private By resetButton = By.cssSelector("a.btn.btn-outline-secondary");
 
     // Sorting headers (Name/Price/Stock have <a> in your HTML)
-    private By sortNameLink  = By.cssSelector("table thead th:nth-child(1) a");
+    private By sortNameLink = By.cssSelector("table thead th:nth-child(1) a");
     private By sortPriceLink = By.cssSelector("table thead th:nth-child(3) a");
     private By sortStockLink = By.cssSelector("table thead th:nth-child(4) a");
 
     // Table
     private By tableRows = By.cssSelector("table tbody tr");
 
-    // Pagination (your HTML snippet doesn’t show it; this is common bootstrap pagination)
+    // Pagination
     private By paginationLinks = By.cssSelector("ul.pagination a.page-link");
     private By paginationActive = By.cssSelector("ul.pagination li.active");
 
-    // Empty state (you said: “No plants found” message)
-    // If it is an alert or table row text, this is a safe generic locator:
-    private By emptyStateText = By.xpath("//*[contains(text(),'No plants found') or contains(text(),'No Plants Found')]");
+    // Empty state
+    private By emptyStateText = By.xpath(
+            "//*[contains(text(),'No plants found') or contains(text(),'No Plants Found')]");
 
     // Admin actions (Add/Edit/Delete)
-    // Your HTML snippet doesn’t show buttons, so we use flexible locators:
     private By addPlantButton = By.xpath("//a[contains(.,'Add') and contains(.,'Plant')]");
     private By editButtons = By.xpath("//a[contains(@href,'/ui/plants/edit') or contains(.,'Edit')]");
-    private By deleteButtons = By.xpath("//*[contains(@data-bs-target,'#deleteModal') or contains(.,'Delete')]");
+    private By deleteButtons = By.xpath(
+            "//*[contains(@data-bs-target,'#deleteModal') or contains(.,'Delete')]");
 
-    // Low stock badge (you mentioned “Low” badge)
-    private By lowBadge = By.xpath("//*[contains(@class,'badge') and (normalize-space()='Low' or contains(.,'Low'))]");
+    // Low stock badge
+    private By lowBadge = By.xpath(
+            "//*[contains(@class,'badge') and (normalize-space()='Low' or contains(.,'Low'))]");
 
     // ---------- Navigation ----------
     public void open() {
@@ -62,8 +62,18 @@ public class PlantsPage {
         return driver.findElements(emptyStateText).size() > 0;
     }
 
+    // public boolean isLowBadgeShown() {
+    // return driver.findElements(lowBadge).size() > 0;
+    // }
     public boolean isLowBadgeShown() {
-        return driver.findElements(lowBadge).size() > 0;
+        List<WebElement> badges = driver.findElements(By.cssSelector("span.badge.bg-danger"));
+
+        for (WebElement badge : badges) {
+            if (badge.getText().trim().equalsIgnoreCase("Low")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ---------- Filter Actions ----------
@@ -101,10 +111,43 @@ public class PlantsPage {
 
     // ---------- Table helpers ----------
     public boolean isPlantDisplayed(String plantName) {
-        for (WebElement row : driver.findElements(tableRows)) {
-            List<WebElement> cols = row.findElements(By.cssSelector("td"));
-            if (cols.size() >= 1 && cols.get(0).getText().trim().equalsIgnoreCase(plantName)) {
-                return true;
+        try {
+            List<WebElement> rows = driver.findElements(tableRows);
+            for (WebElement row : rows) {
+                try {
+                    // Get text from the entire row first to avoid stale element issues
+                    String rowText = row.getText();
+                    if (rowText.contains(plantName)) {
+                        // Double-check by looking at first column
+                        List<WebElement> cols = row.findElements(By.cssSelector("td"));
+                        if (cols.size() >= 1 &&
+                                cols.get(0).getText().trim().equalsIgnoreCase(plantName)) {
+                            return true;
+                        }
+                    }
+                } catch (StaleElementReferenceException e) {
+                    // Element became stale, continue to next row
+                    continue;
+                }
+            }
+        } catch (StaleElementReferenceException e) {
+            // If the entire table became stale, retry once
+            try {
+                Thread.sleep(500); // Brief wait for DOM to stabilize
+                List<WebElement> rows = driver.findElements(tableRows);
+                for (WebElement row : rows) {
+                    try {
+                        List<WebElement> cols = row.findElements(By.cssSelector("td"));
+                        if (cols.size() >= 1 &&
+                                cols.get(0).getText().trim().equalsIgnoreCase(plantName)) {
+                            return true;
+                        }
+                    } catch (StaleElementReferenceException ex) {
+                        continue;
+                    }
+                }
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
             }
         }
         return false;
@@ -122,11 +165,17 @@ public class PlantsPage {
     public void clickPaginationByText(String pageText) {
         for (WebElement link : driver.findElements(paginationLinks)) {
             if (link.getText().trim().equals(pageText)) {
-                link.click();
+                try {
+                    link.click();
+                } catch (ElementClickInterceptedException e) {
+                    ((JavascriptExecutor) driver)
+                            .executeScript("arguments[0].click();", link);
+                }
                 return;
             }
         }
-        throw new NoSuchElementException("Pagination link not found: " + pageText);
+        throw new NoSuchElementException(
+                "Pagination link not found: " + pageText);
     }
 
     // ---------- Role-based visibility ----------
@@ -140,5 +189,28 @@ public class PlantsPage {
 
     public boolean isAnyDeleteVisible() {
         return driver.findElements(deleteButtons).size() > 0;
+    }
+
+    // ---------- Navigation Actions ----------
+    public void clickAddPlant() {
+        driver.findElement(addPlantButton).click();
+    }
+
+    public void clickEditPlant(String plantName) {
+        List<WebElement> rows = driver.findElements(tableRows);
+        for (WebElement row : rows) {
+            if (row.getText().contains(plantName)) {
+                try {
+                    WebElement editBtn = row.findElement(
+                            By.xpath(".//a[contains(@href,'edit')]"));
+                    editBtn.click();
+                    return;
+                } catch (Exception e) {
+                    // continue
+                }
+            }
+        }
+        throw new NoSuchElementException(
+                "Edit button not found for plant: " + plantName);
     }
 }

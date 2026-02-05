@@ -94,7 +94,7 @@ Feature: Admin Sell Plant
   @TC_UI_ADMIN_81
   Scenario: Verify non-admin cannot delete
     Given a non-admin user is logged in
-    And user is on the sales page
+    And the user is on the sales page
     Then delete button should not be visible
 
   @TC_UI_ADMIN_82
