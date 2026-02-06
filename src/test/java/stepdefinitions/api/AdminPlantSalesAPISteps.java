@@ -130,13 +130,13 @@ public class AdminPlantSalesAPISteps extends BaseAPISteps {
     public void admin_sends_delete(String endpoint) {
         response = request.delete(endpoint);
     }
-
-    @Then("the response status code should be {int} or {int}")
-    public void verify_status_range(int code1, int code2) {
-        int actual = response.getStatusCode();
-        Assert.assertTrue("Status code " + actual + " not in expected range",
-                actual == code1 || actual == code2);
-    }
+//
+//    @Then("the response status code should be {int} or {int}")
+//    public void verify_status_range(int code1, int code2) {
+//        int actual = response.getStatusCode();
+//        Assert.assertTrue("Status code " + actual + " not in expected range",
+//                actual == code1 || actual == code2);
+//    }
 
     @When("admin sends a DELETE request to remove the sale")
     public void delete_created_sale() {

@@ -1,4 +1,4 @@
-@UserSales @user
+@UserSales @user @shathu
 Feature: User Sales and Dashboard
   As a standard user
   I want to view sales, verify restrictions, and check dashboard summaries

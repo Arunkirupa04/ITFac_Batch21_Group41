@@ -6,14 +6,14 @@ Feature: User Category API Access Control
 
   @TC_API_USER_05
   Scenario: DELETE forbidden for User
-    Given Category with id 1 exists
+    Given Category with id 1 exists via API
     When User sends DELETE request to "/api/categories/1"
     Then Response status should be 403
     And Response should contain error "Forbidden"
 
   @TC_API_USER_06
   Scenario: GET all categories (read-only)
-    Given Multiple categories exist in database
+    Given Multiple categories exist in database via API
     When User sends GET request to "/api/categories"
     Then Response status should be 200
     And Response should contain array of categories
