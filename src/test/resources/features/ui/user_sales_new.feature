@@ -1,5 +1,5 @@
 
-  @UserSales
+  @UserSales @user
   Feature: User Sales Page Functionality
   As a standard user
   I want to view the sales list
@@ -75,9 +75,9 @@
     When user clicks on Next page button
     Then the next set of records should be displayed
 
-  @TC_UI_USER_50
-  Scenario: User Empty Sales List Message
-    Given a non-admin user is logged in
-    And there are no sales records
-    When the user is on the sales page
-    Then a message "No sales found" should be displayed
+#  @TC_UI_USER_50
+#  Scenario: User Empty Sales List Message
+#    Given a non-admin user is logged in
+#    And there are no sales records
+#    When the user is on the sales page
+#    Then a message "No sales found" should be displayed

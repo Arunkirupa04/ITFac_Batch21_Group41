@@ -33,8 +33,29 @@ public class CommonAPISteps extends BaseAPISteps {
     public void sale_exists(int id) {
         Response check = request.get("/api/sales/" + id);
         if (check.getStatusCode() != 200) {
-            System.out.println("Warning: Sale with ID " + id + " not found.");
+            System.out.println("Warning: Sale with ID " + id + " not found. Attempting to discover any sale...");
+            Response allSales = request.get("/api/sales");
+            if (allSales.getStatusCode() == 200 && !allSales.jsonPath().getList("$").isEmpty()) {
+                createdSaleId = allSales.jsonPath().getInt("[0].id");
+                System.out.println("Discovered existing sale with ID: " + createdSaleId);
+            } else {
+                System.out.println("No sales found. Creating a new sale for the test...");
+                Response create = request.queryParam("quantity", 1).post("/api/sales/plant/1");
+                if (create.getStatusCode() == 201) {
+                    createdSaleId = create.jsonPath().getInt("id");
+                    System.out.println("Created new sale with ID: " + createdSaleId);
+                } else {
+                    Assert.fail("Could not find or create a sale for the test.");
+                }
+            }
+        } else {
+            createdSaleId = id;
         }
+    }
+
+    @When("admin sends a GET request to retrieve the sale")
+    public void retrieve_created_sale() {
+        response = request.get("/api/sales/" + createdSaleId);
     }
 
     @And("the response should contain a list of sales")

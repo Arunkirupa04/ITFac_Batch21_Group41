@@ -1,4 +1,4 @@
-@AdminSellValidation
+@admin @AdminSellValidation
 Feature: Admin Sell Plant Validation
   As an admin
   I want to be prevented from entering invalid data

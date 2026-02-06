@@ -1,4 +1,4 @@
-@UserAccess
+@UserAccess @user
 Feature: User Access Control
   As a standard user
   I want to be restricted from admin-only pages

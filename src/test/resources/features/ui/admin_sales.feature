@@ -1,4 +1,4 @@
-@AdminSales
+@AdminSales @admin
 Feature: Admin Sales Page Verification
   As an admin
   I want to view the sales list
