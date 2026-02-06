@@ -9,4 +9,5 @@ public class BaseAPISteps {
     protected static final String BASE_URL = "http://localhost:8080";
     protected static String adminToken;
     protected static String userToken;
+    protected static Integer dynamicSaleId;
 }

@@ -7,7 +7,7 @@ Feature: User Login & Dashboard Functionality
   @TC_UI_USER_01
   Scenario: Successful User Login and Dashboard Redirection
     Given user is on login page
-    When user enters username "testuser" and password "user123"
+    When user enters username "testuser" and password "test123"
     And user clicks login button
     Then user should be redirected to dashboard
     And close the browser

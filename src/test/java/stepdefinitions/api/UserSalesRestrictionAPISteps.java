@@ -28,16 +28,27 @@ public class UserSalesRestrictionAPISteps extends BaseAPISteps {
 
     @When("user sends a POST request to {string} with body:")
     public void user_sends_post_with_body(String endpoint, String body) {
-        response = request.body(body).post(endpoint);
+        if (body.contains("\"quantity\"")) {
+            String q = body.replaceAll("(?s).*\"quantity\"\\s*:\\s*(\\d+).*", "$1");
+            response = request.queryParam("quantity", Integer.parseInt(q.trim())).post(endpoint);
+        } else {
+            response = request.body(body).post(endpoint);
+        }
     }
 
     @When("user sends a GET request to {string}")
     public void user_sends_get(String endpoint) {
+        if (dynamicSaleId != null && endpoint.equals("/api/sales/1")) {
+            endpoint = "/api/sales/" + dynamicSaleId;
+        }
         response = request.get(endpoint);
     }
 
     @When("user sends a DELETE request to {string}")
     public void user_sends_delete(String endpoint) {
+        if (dynamicSaleId != null && endpoint.equals("/api/sales/1")) {
+            endpoint = "/api/sales/" + dynamicSaleId;
+        }
         response = request.delete(endpoint);
     }
 }

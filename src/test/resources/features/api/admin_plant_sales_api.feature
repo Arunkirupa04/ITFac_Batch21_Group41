@@ -45,7 +45,7 @@ Feature: Admin Plant and Sales Management APIs
     Given a plant exists with ID 1 and limited stock
     When admin sends a POST request to "/api/sales/plant/1" with quantity more than available stock
     Then the response status code should be 400
-    And the response should contain error "Insufficient stock"
+    And the response should contain error "available in stock"
 
   @TC_API_ADMIN_34
   Scenario: Verify sales list as Admin

@@ -7,7 +7,7 @@ import io.cucumber.junit.CucumberOptions;
 @RunWith(Cucumber.class)
 @CucumberOptions(features = "src/test/resources/features/ui", glue = "stepdefinitions.ui", plugin = { "pretty",
                 "html:target/cucumber-report-specific.html",
-                "json:target/cucumber-report-specific.json" }, monochrome = true, tags = "@TC_UI_ADMIN_31" // Run only
+                "json:target/cucumber-report-specific.json" }, monochrome = true, tags = "@TC_UI_USER_26" // Run only
                                                                                                            // TC_UI_ADMIN_21
                                                                                                            // to test
                                                                                                            // the fix

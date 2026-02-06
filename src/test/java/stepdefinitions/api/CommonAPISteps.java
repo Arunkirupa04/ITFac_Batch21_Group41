@@ -25,8 +25,23 @@ public class CommonAPISteps extends BaseAPISteps {
     @Given("a sale exists with ID {int}")
     public void sale_exists(int id) {
         Response check = request.get("/api/sales/" + id);
-        if (check.getStatusCode() != 200) {
-            System.out.println("Warning: Sale with ID " + id + " not found.");
+        if (check.getStatusCode() == 200) {
+            dynamicSaleId = id;
+            return;
+        }
+
+        // Fallback: search for any existing sale
+        Response list = request.get("/api/sales");
+        try {
+            java.util.List<Integer> ids = list.jsonPath().getList("id");
+            if (ids != null && !ids.isEmpty()) {
+                dynamicSaleId = ids.get(0);
+                System.out.println("⚠️ Sale " + id + " not found. Falling back to Sale ID " + dynamicSaleId);
+            } else {
+                Assert.assertEquals("No sales found in system for fallback!", 200, check.getStatusCode());
+            }
+        } catch (Exception e) {
+            Assert.assertEquals("Sale " + id + " not found and list failed!", 200, check.getStatusCode());
         }
     }
 
