@@ -17,6 +17,13 @@ public class CommonAPISteps extends BaseAPISteps {
         Assert.assertEquals("Status code mismatch!", statusCode, response.getStatusCode());
     }
 
+    @Then("the response status code should be {int} or {int}")
+    public void theResponseStatusCodeShouldBeOr(int status1, int status2) {
+        int actualStatus = response.getStatusCode();
+        Assert.assertTrue("Status code should be " + status1 + " or " + status2 + " but was " + actualStatus,
+                actualStatus == status1 || actualStatus == status2);
+    }
+
     @Then("response JSON should contain {string}:{int}")
     public void verify_json_content(String key, int value) {
         response.then().body(key, equalTo(value));

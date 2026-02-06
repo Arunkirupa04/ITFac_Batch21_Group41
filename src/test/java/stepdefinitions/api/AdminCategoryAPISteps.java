@@ -17,7 +17,7 @@ public class AdminCategoryAPISteps {
 
     private static final String BASE_URL = "http://localhost:8080";
     private String adminJwtToken;
-    static Response response;  // Made static to share with UserCategoryAPISteps
+    static Response response; // Made static to share with UserCategoryAPISteps
     private int createdCategoryId;
     private int parentCategoryId;
     private int categoryIdForDeletion;
@@ -53,8 +53,8 @@ public class AdminCategoryAPISteps {
 
     // ========== SETUP STEPS ==========
 
-    @Given("Category with id {int} exists")
-    public void category_with_id_exists(int id) {
+    @Given("Category with id {int} exists via API")
+    public void category_with_id_exists_api(int id) {
         // Verify category exists by making GET request
         Response checkResponse = RestAssured.given()
                 .baseUri(BASE_URL)
@@ -97,24 +97,25 @@ public class AdminCategoryAPISteps {
                 .then()
                 .extract()
                 .response();
-        
+
         List<Map<String, Object>> categories = null;
         try {
             categories = getAllResponse.jsonPath().getList("");
         } catch (Exception e) {
             System.out.println("⚠️ Could not parse categories");
         }
-        
+
         // If categories exist, use the first one
         if (categories != null && categories.size() > 0) {
             categoryIdForUpdate = (Integer) categories.get(0).get("id");
             String categoryName = (String) categories.get(0).get("name");
-            System.out.println("✅ Using existing category for update: " + categoryName + " (id: " + categoryIdForUpdate + ")");
+            System.out.println(
+                    "✅ Using existing category for update: " + categoryName + " (id: " + categoryIdForUpdate + ")");
         } else {
             // Create a new category if none exist
             String uniqueName = "Upd" + (System.currentTimeMillis() % 10000);
             String body = "{\"name\":\"" + uniqueName + "\"}";
-            
+
             Response createResponse = RestAssured.given()
                     .baseUri(BASE_URL)
                     .header("Authorization", "Bearer " + adminJwtToken)
@@ -129,7 +130,8 @@ public class AdminCategoryAPISteps {
             int statusCode = createResponse.getStatusCode();
             if (statusCode == 201) {
                 categoryIdForUpdate = createResponse.jsonPath().getInt("id");
-                System.out.println("✅ Category created for update: " + uniqueName + " (id: " + categoryIdForUpdate + ")");
+                System.out
+                        .println("✅ Category created for update: " + uniqueName + " (id: " + categoryIdForUpdate + ")");
             } else {
                 System.out.println("⚠️ Failed to create category. Status: " + statusCode);
                 System.out.println("   Response: " + createResponse.getBody().asString());
@@ -144,7 +146,7 @@ public class AdminCategoryAPISteps {
         String uniqueName = "Del" + (System.currentTimeMillis() % 10000);
         // Fixed: Use "name" only, no parent field for main category
         String body = "{\"name\":\"" + uniqueName + "\"}";
-        
+
         Response createResponse = RestAssured.given()
                 .baseUri(BASE_URL)
                 .header("Authorization", "Bearer " + adminJwtToken)
@@ -159,15 +161,16 @@ public class AdminCategoryAPISteps {
         int statusCode = createResponse.getStatusCode();
         if (statusCode == 201) {
             categoryIdForDeletion = createResponse.jsonPath().getInt("id");
-            System.out.println("✅ Category created for deletion: " + uniqueName + " (id: " + categoryIdForDeletion + ")");
+            System.out
+                    .println("✅ Category created for deletion: " + uniqueName + " (id: " + categoryIdForDeletion + ")");
         } else {
             System.out.println("⚠️ Failed to create category. Status: " + statusCode);
             System.out.println("   Response: " + createResponse.getBody().asString());
         }
     }
 
-    @Given("Multiple categories exist in database")
-    public void multiple_categories_exist_in_database() {
+    @Given("Multiple categories exist in database via API")
+    public void multiple_categories_exist_in_database_api() {
         // Check if categories exist, if not create some
         Response checkResponse = RestAssured.given()
                 .baseUri(BASE_URL)
@@ -185,7 +188,7 @@ public class AdminCategoryAPISteps {
         } catch (Exception e) {
             System.out.println("⚠️ Could not parse categories list");
         }
-        
+
         if (categories == null || categories.size() < 3) {
             // Create a few test categories
             for (int i = 1; i <= 3; i++) {
@@ -199,7 +202,7 @@ public class AdminCategoryAPISteps {
                         .body(body)
                         .when()
                         .post("/api/categories");
-                
+
                 try {
                     Thread.sleep(100); // Small delay for unique timestamps
                 } catch (InterruptedException e) {
@@ -218,7 +221,7 @@ public class AdminCategoryAPISteps {
         parentCategoryName = uniqueName;
         // Fixed: Use "name" only for main category
         String body = "{\"name\":\"" + uniqueName + "\"}";
-        
+
         Response createResponse = RestAssured.given()
                 .baseUri(BASE_URL)
                 .header("Authorization", "Bearer " + adminJwtToken)
@@ -252,7 +255,7 @@ public class AdminCategoryAPISteps {
                 .then()
                 .extract()
                 .response();
-        
+
         System.out.println("✅ Admin sent GET request to: " + endpoint);
         System.out.println("   Response status: " + response.getStatusCode());
     }
@@ -261,7 +264,7 @@ public class AdminCategoryAPISteps {
     public void admin_sends_put_request_to_that_category_with_body(DataTable dataTable) {
         List<Map<String, String>> rows = dataTable.asMaps();
         String name = rows.get(0).get("name");
-        
+
         // Fixed: Use null for parentId for main categories (not 0)
         // Backend expects: {"name":"string","parentId":null} for main category
         String body;
@@ -270,9 +273,9 @@ public class AdminCategoryAPISteps {
         } else {
             body = "{\"name\":\"" + name + "\",\"parentId\":null}";
         }
-        
+
         String endpoint = "/api/categories/" + categoryIdForUpdate;
-        
+
         response = RestAssured.given()
                 .baseUri(BASE_URL)
                 .header("Authorization", "Bearer " + adminJwtToken)
@@ -283,7 +286,7 @@ public class AdminCategoryAPISteps {
                 .then()
                 .extract()
                 .response();
-        
+
         System.out.println("✅ Admin sent PUT request to: " + endpoint);
         System.out.println("   Request body: " + body);
         System.out.println("   Response status: " + response.getStatusCode());
@@ -296,7 +299,7 @@ public class AdminCategoryAPISteps {
     public void admin_sends_put_request_to_with_body(String endpoint, DataTable dataTable) {
         List<Map<String, String>> rows = dataTable.asMaps();
         String name = rows.get(0).get("name");
-        
+
         // Fixed: Add parentId field (0 for main category, as per Swagger)
         String body;
         if (name == null || name.trim().isEmpty()) {
@@ -304,7 +307,7 @@ public class AdminCategoryAPISteps {
         } else {
             body = "{\"name\":\"" + name + "\",\"parentId\":0}";
         }
-        
+
         response = RestAssured.given()
                 .baseUri(BASE_URL)
                 .header("Authorization", "Bearer " + adminJwtToken)
@@ -315,7 +318,7 @@ public class AdminCategoryAPISteps {
                 .then()
                 .extract()
                 .response();
-        
+
         System.out.println("✅ Admin sent PUT request to: " + endpoint);
         System.out.println("   Request body: " + body);
         System.out.println("   Response status: " + response.getStatusCode());
@@ -331,7 +334,7 @@ public class AdminCategoryAPISteps {
                 .then()
                 .extract()
                 .response();
-        
+
         System.out.println("✅ Admin sent DELETE request to: /api/categories/" + categoryIdForDeletion);
         System.out.println("   Response status: " + response.getStatusCode());
     }
@@ -341,10 +344,10 @@ public class AdminCategoryAPISteps {
         List<Map<String, String>> rows = dataTable.asMaps();
         String name = rows.get(0).get("name");
         String parentCategory = rows.get(0).get("parentCategory");
-        
+
         // Fixed: Generate unique name with timestamp to avoid duplicates
         String uniqueName = name + (System.currentTimeMillis() % 1000);
-        
+
         // Fixed: Use "name" only for main category (no parent field)
         // Swagger expects: {"name": "string"} for main category
         String body;
@@ -354,7 +357,7 @@ public class AdminCategoryAPISteps {
             // For sub-category, use "parent" field with parent name (not parentCategory)
             body = "{\"name\":\"" + uniqueName + "\",\"parent\":\"" + parentCategory + "\"}";
         }
-        
+
         response = RestAssured.given()
                 .baseUri(BASE_URL)
                 .header("Authorization", "Bearer " + adminJwtToken)
@@ -365,11 +368,11 @@ public class AdminCategoryAPISteps {
                 .then()
                 .extract()
                 .response();
-        
+
         if (response.getStatusCode() == 201) {
             createdCategoryId = response.jsonPath().getInt("id");
         }
-        
+
         System.out.println("✅ Admin sent POST request to: " + endpoint);
         System.out.println("   Request body: " + body);
         System.out.println("   Response status: " + response.getStatusCode());
@@ -382,14 +385,14 @@ public class AdminCategoryAPISteps {
     public void admin_sends_post_request_to_with_sub_category_body(String endpoint, DataTable dataTable) {
         List<Map<String, String>> rows = dataTable.asMaps();
         String name = rows.get(0).get("name");
-        
+
         // Fixed: Generate unique name with timestamp to avoid duplicates
         String uniqueName = name + (System.currentTimeMillis() % 1000);
-        
+
         // Fixed: Use "parent" field with parent category object (with id)
         // Based on error: API expects parent as object, not string
         String body = "{\"name\":\"" + uniqueName + "\",\"parent\":{\"id\":" + parentCategoryId + "}}";
-        
+
         response = RestAssured.given()
                 .baseUri(BASE_URL)
                 .header("Authorization", "Bearer " + adminJwtToken)
@@ -400,11 +403,11 @@ public class AdminCategoryAPISteps {
                 .then()
                 .extract()
                 .response();
-        
+
         if (response.getStatusCode() == 201) {
             createdCategoryId = response.jsonPath().getInt("id");
         }
-        
+
         System.out.println("✅ Admin sent POST request to: " + endpoint);
         System.out.println("   Request body: " + body);
         System.out.println("   Response status: " + response.getStatusCode());
@@ -426,15 +429,17 @@ public class AdminCategoryAPISteps {
     public void response_status_should_be_or(int status1, int status2) {
         int actualStatus = response.getStatusCode();
         boolean isValid = actualStatus == status1 || actualStatus == status2;
-        Assert.assertTrue("Response status should be " + status1 + " or " + status2 + " but was " + actualStatus, isValid);
+        Assert.assertTrue("Response status should be " + status1 + " or " + status2 + " but was " + actualStatus,
+                isValid);
         System.out.println("✅ Response status verified: " + actualStatus);
     }
 
     @And("Response should contain error message {string}")
     public void response_should_contain_error_message(String expectedMessage) {
         String responseBody = response.getBody().asString();
-        Assert.assertTrue("Response should contain error message: " + expectedMessage, 
-            responseBody.contains(expectedMessage) || responseBody.contains("not found") || responseBody.contains("Not Found"));
+        Assert.assertTrue("Response should contain error message: " + expectedMessage,
+                responseBody.contains(expectedMessage) || responseBody.contains("not found")
+                        || responseBody.contains("Not Found"));
         System.out.println("✅ Error message verified in response");
     }
 
@@ -448,11 +453,11 @@ public class AdminCategoryAPISteps {
     @And("Response should contain validation error")
     public void response_should_contain_validation_error() {
         String responseBody = response.getBody().asString();
-        boolean hasValidationError = responseBody.contains("required") || 
-                                     responseBody.contains("invalid") || 
-                                     responseBody.contains("validation") ||
-                                     responseBody.contains("Name") ||
-                                     response.getStatusCode() == 400;
+        boolean hasValidationError = responseBody.contains("required") ||
+                responseBody.contains("invalid") ||
+                responseBody.contains("validation") ||
+                responseBody.contains("Name") ||
+                response.getStatusCode() == 400;
         Assert.assertTrue("Response should contain validation error", hasValidationError);
         System.out.println("✅ Validation error verified in response");
     }
@@ -483,7 +488,7 @@ public class AdminCategoryAPISteps {
         } catch (Exception e) {
             System.out.println("⚠️ Error parsing categories: " + e.getMessage());
         }
-        
+
         Assert.assertNotNull("Response should contain categories array", categories);
         Assert.assertTrue("Categories array should not be empty", categories.size() > 0);
         System.out.println("✅ Array of categories verified: " + categories.size() + " categories found");
@@ -500,9 +505,9 @@ public class AdminCategoryAPISteps {
     @And("Response should contain new sub-category with parent")
     public void response_should_contain_new_sub_category_with_parent() {
         Integer categoryId = response.jsonPath().getInt("id");
-        
+
         Assert.assertNotNull("Response should contain category ID", categoryId);
-        
+
         // Fixed: Try multiple possible parent field structures
         Integer parentId = null;
         try {
@@ -517,7 +522,7 @@ public class AdminCategoryAPISteps {
                 System.out.println("⚠️ Parent ID not found in response, but category created successfully");
             }
         }
-        
+
         if (parentId != null) {
             Assert.assertEquals("Parent category ID should match", parentCategoryId, parentId.intValue());
             System.out.println("✅ New sub-category verified with parent ID: " + parentId);

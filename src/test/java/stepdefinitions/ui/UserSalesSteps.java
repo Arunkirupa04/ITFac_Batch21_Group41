@@ -1,15 +1,14 @@
 package stepdefinitions.ui;
 
-import io.cucumber.java.After;
 import io.cucumber.java.en.*;
 import org.junit.Assert;
 import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.DashboardPage;
 import pages.SalesPage;
 import pages.SellPlantPage;
+import utils.DriverFactory;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -17,7 +16,6 @@ import java.util.List;
 
 public class UserSalesSteps {
 
-    WebDriver driver;
     SalesPage salesPage;
     SellPlantPage sellPlantPage;
     DashboardPage dashboardPage;
@@ -26,24 +24,25 @@ public class UserSalesSteps {
 
     // Helper: Initialize driver
     private void ensureDriver() {
-        if (driver == null) {
-            driver = new ChromeDriver();
-            driver.manage().window().maximize();
-        }
+        DriverFactory.initDriver();
+    }
+
+    private WebDriver getDriver() {
+        return DriverFactory.getDriver();
     }
 
     // Helper: Login as Standard User
     private void loginAsUser() {
         ensureDriver();
-        driver.get("http://localhost:8080/ui/login");
+        getDriver().get("http://localhost:8080/ui/login");
         // Check if already logged in as someone else
-        if (driver.getCurrentUrl().contains("/ui/login")) {
-            driver.findElement(By.name("username")).sendKeys("testuser");
-            driver.findElement(By.name("password")).sendKeys("test123");
-            driver.findElement(By.cssSelector("button[type='submit']")).click();
+        if (getDriver().getCurrentUrl().contains("/ui/login")) {
+            getDriver().findElement(By.name("username")).sendKeys("testuser");
+            getDriver().findElement(By.name("password")).sendKeys("test123");
+            getDriver().findElement(By.cssSelector("button[type='submit']")).click();
 
             // Wait for redirect away from login page
-            new WebDriverWait(driver, Duration.ofSeconds(10))
+            new WebDriverWait(getDriver(), Duration.ofSeconds(10))
                     .until(ExpectedConditions.not(ExpectedConditions.urlContains("/ui/login")));
         }
     }
@@ -51,18 +50,18 @@ public class UserSalesSteps {
     // Helper: Login as Admin
     private void loginAsAdmin() {
         ensureDriver();
-        driver.get("http://localhost:8080/ui/login");
+        getDriver().get("http://localhost:8080/ui/login");
 
         // If redirected away from login (meaning valid session exists), logout first
-        if (!driver.getCurrentUrl().contains("/ui/login")) {
-            driver.get("http://localhost:8080/ui/logout");
-            driver.get("http://localhost:8080/ui/login");
+        if (!getDriver().getCurrentUrl().contains("/ui/login")) {
+            getDriver().get("http://localhost:8080/ui/logout");
+            getDriver().get("http://localhost:8080/ui/login");
         }
 
-        if (driver.getCurrentUrl().contains("/ui/login")) {
-            driver.findElement(By.name("username")).sendKeys("admin");
-            driver.findElement(By.name("password")).sendKeys("admin123");
-            driver.findElement(By.cssSelector("button[type='submit']")).click();
+        if (getDriver().getCurrentUrl().contains("/ui/login")) {
+            getDriver().findElement(By.name("username")).sendKeys("admin");
+            getDriver().findElement(By.name("password")).sendKeys("admin123");
+            getDriver().findElement(By.cssSelector("button[type='submit']")).click();
 
             // Wait for redirect
             try {
@@ -81,10 +80,10 @@ public class UserSalesSteps {
 
     @Given("user is on the sales page")
     public void user_is_on_the_sales_page() {
-        if (!driver.getCurrentUrl().contains("/ui/sales")) {
-            driver.get("http://localhost:8080/ui/sales");
+        if (!getDriver().getCurrentUrl().contains("/ui/sales")) {
+            getDriver().get("http://localhost:8080/ui/sales");
         }
-        salesPage = new SalesPage(driver);
+        salesPage = new SalesPage(getDriver());
     }
 
     @Given("sales exist in the system")
@@ -103,8 +102,8 @@ public class UserSalesSteps {
         // We need to ensure there is a plant with 0 stock.
         // Switch to Admin to check/create this condition.
         loginAsAdmin();
-        driver.get("http://localhost:8080/ui/sales/new");
-        SellPlantPage adminSellPage = new SellPlantPage(driver);
+        getDriver().get("http://localhost:8080/ui/sales/new");
+        SellPlantPage adminSellPage = new SellPlantPage(getDriver());
 
         String[] options = adminSellPage.getAllPlantOptions();
         boolean foundZero = false;
@@ -134,7 +133,7 @@ public class UserSalesSteps {
         }
 
         // Logout Admin
-        driver.get("http://localhost:8080/ui/logout");
+        getDriver().get("http://localhost:8080/ui/logout");
 
         // Log back in as User
         loginAsUser();
@@ -143,15 +142,15 @@ public class UserSalesSteps {
     @Given("user is on the sell plant page")
     public void user_is_on_the_sell_plant_page() {
         // Try to navigate directly
-        driver.get("http://localhost:8080/ui/sales/new");
-        sellPlantPage = new SellPlantPage(driver);
+        getDriver().get("http://localhost:8080/ui/sales/new");
+        sellPlantPage = new SellPlantPage(getDriver());
     }
 
     @Given("a plant exists with specific stock")
     public void a_plant_exists_with_specific_stock() {
         user_is_on_the_sell_plant_page();
         // Just ensure options are loaded
-        sellPlantPage = new SellPlantPage(driver);
+        sellPlantPage = new SellPlantPage(getDriver());
     }
 
     @Given("the database has known counts of Categories, Plants, and Sales")
@@ -166,7 +165,7 @@ public class UserSalesSteps {
     @When("user opens the plant dropdown on the sell page")
     public void user_opens_plant_dropdown() {
         user_is_on_the_sell_plant_page();
-        sellPlantPage = new SellPlantPage(driver);
+        sellPlantPage = new SellPlantPage(getDriver());
         // Accessing the dropdown options
     }
 
@@ -211,7 +210,7 @@ public class UserSalesSteps {
             if (s == stock) {
                 sellPlantPage.selectPlant(opt);
                 sellPlantPage.enterQuantity(String.valueOf(qty));
-                driver.findElement(By.cssSelector("button.btn.btn-primary")).click(); // Click save/sell
+                getDriver().findElement(By.cssSelector("button.btn.btn-primary")).click(); // Click save/sell
                 return;
             }
         }
@@ -242,14 +241,14 @@ public class UserSalesSteps {
 
     @When("user navigates to the Dashboard")
     public void user_navigates_to_dashboard() {
-        driver.get("http://localhost:8080/ui/dashboard");
-        dashboardPage = new DashboardPage(driver);
+        getDriver().get("http://localhost:8080/ui/dashboard");
+        dashboardPage = new DashboardPage(getDriver());
     }
 
     @When("user clicks on {string} in sidebar")
     public void user_clicks_on_sidebar_link(String linkName) {
         if (dashboardPage == null)
-            dashboardPage = new DashboardPage(driver);
+            dashboardPage = new DashboardPage(getDriver());
         dashboardPage.clickSidebarLink(linkName);
         try {
             Thread.sleep(500);
@@ -257,25 +256,11 @@ public class UserSalesSteps {
         }
     }
 
-    @When("user navigates to {string}")
-    public void user_navigates_to_page(String pageName) {
-        if (pageName.equalsIgnoreCase("Dashboard")) {
-            driver.get("http://localhost:8080/ui/dashboard");
-        } else if (pageName.equalsIgnoreCase("Sales")) {
-            driver.get("http://localhost:8080/ui/sales");
-        } else if (pageName.equalsIgnoreCase("Categories")) {
-            driver.get("http://localhost:8080/ui/categories");
-        } else if (pageName.equalsIgnoreCase("Plants")) {
-            driver.get("http://localhost:8080/ui/plants");
-        }
-        dashboardPage = new DashboardPage(driver);
-    }
-
     // ==================== THEN STEPS ====================
 
     @Then("the \"Sell Plant\" button should not be visible")
     public void sell_plant_button_hidden() {
-        Assert.assertFalse("Sell Plant button should be hidden for User", salesPage.isSellButtonVisible());
+        Assert.assertFalse("Sell Plant button should be hidden for User", salesPage.isSellPlantButtonVisible());
     }
 
     @Then("the delete button for sales should not be visible")
@@ -316,10 +301,10 @@ public class UserSalesSteps {
         // Usually, if required, the browser shows a bubble, which is hard to test with
         // Selenium.
         // Assuming custom validation using alert-danger or similar.
-        boolean hasError = driver.findElements(By.cssSelector(".alert-danger, .invalid-feedback")).size() > 0;
+        boolean hasError = getDriver().findElements(By.cssSelector(".alert-danger, .invalid-feedback")).size() > 0;
 
         // If HTML5 required attribute is used, we can check that.
-        // WebElement select = driver.findElement(By.id("plantId"));
+        // WebElement select = getDriver().findElement(By.id("plantId"));
         // Assert.assertEquals("true", select.getAttribute("required"));
 
         // For now, assuming standard error:
@@ -329,16 +314,16 @@ public class UserSalesSteps {
 
     @Then("a quantity error should be displayed")
     public void quantity_error_displayed() {
-        boolean hasError = driver.findElements(By.cssSelector(".alert-danger, .invalid-feedback")).size() > 0;
+        boolean hasError = getDriver().findElements(By.cssSelector(".alert-danger, .invalid-feedback")).size() > 0;
         Assert.assertTrue("Quantity error should be displayed", hasError);
     }
 
     @Then("an error related to stock should be displayed")
     public void stock_error_displayed() {
-        boolean hasError = driver.findElements(By.cssSelector(".alert-danger")).size() > 0;
+        boolean hasError = getDriver().findElements(By.cssSelector(".alert-danger")).size() > 0;
         // Check text if possible
         if (hasError) {
-            String text = driver.findElement(By.cssSelector(".alert-danger")).getText();
+            String text = getDriver().findElement(By.cssSelector(".alert-danger")).getText();
             Assert.assertTrue("Error should relate to stock", text.toLowerCase().contains("stock"));
         } else {
             Assert.fail("No error displayed");
@@ -348,14 +333,14 @@ public class UserSalesSteps {
     @Then("the sale should be created and stock reduced to 0")
     public void sale_created_stock_zero() {
         // Navigate to sales list to check success (redirect)
-        new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.urlContains("/ui/sales"));
-        Assert.assertTrue(driver.getCurrentUrl().contains("/ui/sales"));
+        new WebDriverWait(getDriver(), Duration.ofSeconds(5)).until(ExpectedConditions.urlContains("/ui/sales"));
+        Assert.assertTrue(getDriver().getCurrentUrl().contains("/ui/sales"));
 
         // Verify stock is now 0 (need to go back to sell page to check dropdown?)
         // If User logic for dropdown works, stock 0 means it should DISAPPEAR from
         // dropdown (TC 53).
-        driver.get("http://localhost:8080/ui/sales/new");
-        sellPlantPage = new SellPlantPage(driver);
+        getDriver().get("http://localhost:8080/ui/sales/new");
+        sellPlantPage = new SellPlantPage(getDriver());
 
         int stock = sellPlantPage.extractStockFromOption(sellPlantPage.getSelectedPlantText());
         // If getting text is hard because it's selected, wait.
@@ -373,7 +358,7 @@ public class UserSalesSteps {
         // Expected: 5 Categories, 10 Plants, 3 Sales
         // We will assert these values if found.
         if (dashboardPage == null)
-            dashboardPage = new DashboardPage(driver);
+            dashboardPage = new DashboardPage(getDriver());
 
         // Note: These expected values are from the prompt example.
         // I should probably make them flexible or print them.
@@ -397,20 +382,13 @@ public class UserSalesSteps {
         // But "Then user should land..." is one step at the end.
         // We can't verifying previous landings easily unless we tracked them.
         // Check current page is Sales (last clicked).
-        Assert.assertTrue(driver.getCurrentUrl().contains("/ui/sales"));
+        Assert.assertTrue(getDriver().getCurrentUrl().contains("/ui/sales"));
     }
 
     @Then("the {string} link in sidebar should be highlighted")
     public void sidebar_link_highlighted(String linkName) {
         if (dashboardPage == null)
-            dashboardPage = new DashboardPage(driver);
+            dashboardPage = new DashboardPage(getDriver());
         Assert.assertTrue(linkName + " should be highlighted/active", dashboardPage.isSidebarLinkHighlighted(linkName));
-    }
-
-    @After
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
     }
 }

@@ -37,7 +37,7 @@ Feature: Admin Category API Management
 
   @TC_API_ADMIN_12
   Scenario: GET all categories
-    Given Multiple categories exist in database
+    Given Multiple categories exist in database via API
     When Admin sends GET request to "/api/categories"
     Then Response status should be 200
     And Response should contain array of categories
