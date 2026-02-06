@@ -40,18 +40,6 @@ public class AdminApiSteps extends ApiBase {
         response = request.get(endpoint);
     }
 
-    @Then("the response status code should be {int}")
-    public void theResponseStatusCodeShouldBe(int statusCode) {
-        response.then().statusCode(statusCode);
-    }
-
-    @Then("the response status code should be {int} or {int}")
-    public void theResponseStatusCodeShouldBeOr(int status1, int status2) {
-        int actualStatus = response.getStatusCode();
-        Assert.assertTrue("Status code should be " + status1 + " or " + status2 + " but was " + actualStatus,
-                actualStatus == status1 || actualStatus == status2);
-    }
-
     @Then("the error message should be {string}")
     public void theErrorMessageShouldBe(String expectedMessage) {
         // Assuming error response has a "message" field or similar

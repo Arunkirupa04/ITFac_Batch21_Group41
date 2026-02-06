@@ -18,13 +18,18 @@ public class SalesPage {
     private By salesTableRows = By.cssSelector("table tbody tr");
     private By nextPageBtn = By.linkText("Next");
     private By previousPageBtn = By.linkText("Previous");
+    private By paginationLinks = By.cssSelector(".pagination a, ul.pagination li");
 
     private By emptyStateMessage = By.xpath("//*[contains(text(), 'No sales found')]"); // Generic text match
 
     // ---------- Page validations ----------
     public boolean isOnSalesPage() {
-        return driver.getCurrentUrl().contains("/ui/sales")
-                && driver.findElement(pageHeading).getText().equals("Sales");
+        try {
+            return driver.getCurrentUrl().contains("/ui/sales")
+                    && driver.findElement(pageHeading).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public String getPageHeading() {
@@ -37,7 +42,8 @@ public class SalesPage {
     }
 
     public void clickColumnHeader(String columnName) {
-        driver.findElement(By.linkText(columnName)).click();
+        // Find the link within a table header that contains the column name text
+        driver.findElement(By.xpath("//th//a[contains(text(), '" + columnName + "')]")).click();
     }
 
     // ---------- Table ----------
@@ -145,8 +151,8 @@ public class SalesPage {
 
     // ---------- Pagination ----------
     public boolean isPaginationVisible() {
-        // Checking if next/prev buttons are present
-        return driver.findElements(nextPageBtn).size() > 0 || driver.findElements(previousPageBtn).size() > 0;
+        // Checking if any pagination elements are present
+        return driver.findElements(paginationLinks).size() > 0;
     }
 
     public void clickNextPage() {

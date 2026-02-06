@@ -19,9 +19,14 @@ public class SellPlantPage {
     private By pageHeading = By.tagName("h3");
 
     // ---------- Actions ----------
+    private Select getPlantSelect() {
+        new org.openqa.selenium.support.ui.WebDriverWait(driver, java.time.Duration.ofSeconds(10))
+                .until(org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated(plantDropdown));
+        return new Select(driver.findElement(plantDropdown));
+    }
+
     public void selectPlant(String plantName) {
-        Select select = new Select(driver.findElement(plantDropdown));
-        select.selectByVisibleText(plantName);
+        getPlantSelect().selectByVisibleText(plantName);
     }
 
     public void enterQuantity(String quantity) {
@@ -31,7 +36,8 @@ public class SellPlantPage {
     }
 
     /**
-     * Clicks the Sell button. After this, if the sale is successful, the app navigates to the Sales page.
+     * Clicks the Sell button. After this, if the sale is successful, the app
+     * navigates to the Sales page.
      * There is no success message on SellPlantPage.
      */
     public void clickSell() {
@@ -52,11 +58,12 @@ public class SellPlantPage {
     // ---------- Stock Extraction ----------
     /**
      * Extracts the current stock value for a given plant from the dropdown
+     * 
      * @param plantName The base name of the plant (e.g., "Lemon")
      * @return The stock value as an integer, or -1 if plant not found
      */
     public int extractStockFromOption(String plantName) {
-        Select select = new Select(driver.findElement(plantDropdown));
+        Select select = getPlantSelect();
 
         for (WebElement option : select.getOptions()) {
             String optionText = option.getText();
@@ -78,20 +85,20 @@ public class SellPlantPage {
 
     /**
      * Gets the full text of the selected plant option
+     * 
      * @return The text of the currently selected option (e.g., "Lemon (Stock: 10)")
      */
     public String getSelectedPlantText() {
-        Select select = new Select(driver.findElement(plantDropdown));
-        return select.getFirstSelectedOption().getText();
+        return getPlantSelect().getFirstSelectedOption().getText();
     }
 
     /**
      * Gets all available plants in the dropdown
+     * 
      * @return Array of option texts
      */
     public String[] getAllPlantOptions() {
-        Select select = new Select(driver.findElement(plantDropdown));
-        return select.getOptions().stream()
+        return getPlantSelect().getOptions().stream()
                 .map(WebElement::getText)
                 .toArray(String[]::new);
     }

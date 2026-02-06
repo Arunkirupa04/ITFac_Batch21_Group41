@@ -13,8 +13,13 @@ public class UserSteps {
     // cross-pollenate step classes if they have state.
     // It's safer to use SalesPage directly here.
 
+    private void ensureDriver() {
+        DriverFactory.initDriver();
+    }
+
     private SalesPage getSalesPage() {
         if (salesPage == null) {
+            ensureDriver();
             salesPage = new SalesPage(DriverFactory.getDriver());
         }
         return salesPage;
@@ -22,6 +27,7 @@ public class UserSteps {
 
     @When("user navigates to {string}")
     public void user_navigates_to(String urlPath) {
+        ensureDriver();
         DriverFactory.getDriver().get("http://localhost:8080" + urlPath);
     }
 
@@ -37,6 +43,7 @@ public class UserSteps {
 
     @When("the user is on the sales page")
     public void user_is_on_the_sales_page() {
+        ensureDriver();
         if (!getSalesPage().isOnSalesPage()) {
             DriverFactory.getDriver().get("http://localhost:8080/ui/sales");
         }
