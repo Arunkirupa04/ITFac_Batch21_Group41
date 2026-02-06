@@ -8,36 +8,35 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import utils.DriverFactory;
+
 import java.time.Duration;
 
 public class UserLoginSteps {
 
-    WebDriver driver;
-
-
+    private WebDriver getDriver() {
+        DriverFactory.initDriver();
+        return DriverFactory.getDriver();
+    }
 
     @Given("user is on login page")
     public void user_is_on_login_page() {
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        driver.get("http://localhost:8080/ui/login");
+        getDriver().get("http://localhost:8080/ui/login");
         System.out.println("Login page opened ✅");
     }
 
     @When("user enters username {string} and password {string}")
     public void user_enters_credentials(String username, String password) {
-        driver.findElement(By.name("username")).clear();
-        driver.findElement(By.name("username")).sendKeys(username);
+        getDriver().findElement(By.name("username")).clear();
+        getDriver().findElement(By.name("username")).sendKeys(username);
 
-        driver.findElement(By.name("password")).clear();
-        driver.findElement(By.name("password")).sendKeys(password);
+        getDriver().findElement(By.name("password")).clear();
+        getDriver().findElement(By.name("password")).sendKeys(password);
     }
 
     @And("user clicks login button")
     public void user_clicks_login_button() {
-        driver.findElement(By.cssSelector("button[type='submit']")).click();
+        getDriver().findElement(By.cssSelector("button[type='submit']")).click();
     }
 
     // TC_UI_USER_01
@@ -45,7 +44,7 @@ public class UserLoginSteps {
     @Then("user should be redirected to dashboard")
     public void user_should_be_redirected_to_dashboard() throws InterruptedException {
         Thread.sleep(2000);
-        if (driver.getCurrentUrl().contains("/dashboard")) {
+        if (getDriver().getCurrentUrl().contains("/dashboard")) {
             System.out.println("User redirected to dashboard ✅");
         } else {
             System.out.println("Dashboard redirection failed ❌");
@@ -54,19 +53,19 @@ public class UserLoginSteps {
 
     @And("close the browser")
     public void close_the_browser() {
-        driver.quit();
+        DriverFactory.quitDriver();
     }
 
     // TC_UI_USER_02,03
 
     @Then("error message {string} should be displayed")
     public void error_message_should_be_displayed(String expectedMessage) {
-        if (driver.getPageSource().contains(expectedMessage)) {
+        if (getDriver().getPageSource().contains(expectedMessage)) {
             System.out.println("Error message displayed correctly ✅");
         } else {
             System.out.println("Expected error message NOT found ❌");
         }
-        driver.quit();
+        DriverFactory.quitDriver();
     }
 
     // TC_UI_USER_04
@@ -81,140 +80,115 @@ public class UserLoginSteps {
 
     @When("user clicks logout")
     public void user_clicks_logout() {
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-
+        WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(10));
         wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//a[contains(@href,'logout')]")
-        )).click();
+                By.xpath("//a[contains(@href,'logout')]"))).click();
     }
-
 
     @Then("user should see message {string}")
     public void user_should_see_message(String message) {
-
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-
+        WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(5));
         wait.until(ExpectedConditions.urlContains("logout"));
 
-        if (driver.getCurrentUrl().contains("logout")) {
+        if (getDriver().getCurrentUrl().contains("logout")) {
             System.out.println("Logout successful ✅");
         } else {
             System.out.println("Logout verification failed ❌");
         }
-
-        driver.quit();
+        DriverFactory.quitDriver();
     }
 
-
-
-    //TC_UI_USER_05
+    // TC_UI_USER_05
 
     @Given("user is not logged in")
     public void user_is_not_logged_in() {
-        WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        DriverFactory.initDriver();
     }
 
-
-    @When("user navigates to dashboard page")
-    public void user_navigates_to_dashboard_page() {
-        driver.get("http://localhost:8080/ui/dashboard");
-    }
+    // Navigation handled in UserSteps.java
 
     @Then("user should be redirected to login page")
     public void user_should_be_redirected_to_login_page() {
-        if (driver.getCurrentUrl().contains("/login")) {
+        if (getDriver().getCurrentUrl().contains("/login")) {
             System.out.println("Redirected to login page ✅");
         } else {
             System.out.println("Redirection failed ❌");
         }
-        driver.quit();
+        DriverFactory.quitDriver();
     }
-
-    // TC_UI_USER_06
 
     @Then("dashboard should be displayed with summary cards")
     public void dashboard_should_be_displayed_with_summary_cards() {
-        if (driver.getPageSource().contains("Dashboard")) {
+        if (getDriver().getPageSource().contains("Dashboard")) {
             System.out.println("Dashboard loaded for user ✅");
         }
-        driver.quit();
+        DriverFactory.quitDriver();
     }
 
     // TC_UI_USER_07
 
     @Then("dashboard summary cards should show initial values")
     public void dashboard_summary_cards_should_show_initial_values() {
-        if (driver.getPageSource().contains("Categories")
-                && driver.getPageSource().contains("Plants")
-                && driver.getPageSource().contains("Sales")) {
+        if (getDriver().getPageSource().contains("Categories")
+                && getDriver().getPageSource().contains("Plants")
+                && getDriver().getPageSource().contains("Sales")) {
             System.out.println("Summary cards visible for user ✅");
         }
-        driver.quit();
+        DriverFactory.quitDriver();
     }
-
-    // TC_UI_USER_08
 
     @Then("admin action buttons should not be visible")
     public void admin_action_buttons_should_not_be_visible() {
-        boolean adminButtonsPresent =
-                driver.getPageSource().contains("Manage Categories") ||
-                        driver.getPageSource().contains("Add Plant") ||
-                        driver.getPageSource().contains("Sell Plant");
+        boolean adminButtonsPresent = getDriver().getPageSource().contains("Manage Categories") ||
+                getDriver().getPageSource().contains("Add Plant") ||
+                getDriver().getPageSource().contains("Sell Plant");
 
         if (!adminButtonsPresent) {
             System.out.println("Admin action buttons hidden for user ✅");
         } else {
             System.out.println("Admin action buttons visible ❌");
         }
-        driver.quit();
+        DriverFactory.quitDriver();
     }
 
     // TC_UI_USER_09
 
     @When("user clicks Categories section")
     public void user_clicks_categories_section() {
-        driver.findElement(By.linkText("Categories")).click();
+        getDriver().findElement(By.linkText("Categories")).click();
     }
 
     @Then("user should be navigated to categories page")
     public void user_should_be_navigated_to_categories_page() {
-        if (driver.getCurrentUrl().contains("/categories")) {
+        if (getDriver().getCurrentUrl().contains("/categories")) {
             System.out.println("User navigated to Categories page ✅");
         }
-        driver.quit();
+        DriverFactory.quitDriver();
     }
-
-    // TC_UI_USER_10
 
     @When("user clicks Plants section")
     public void user_clicks_plants_section() {
-        driver.findElement(By.linkText("Plants")).click();
+        getDriver().findElement(By.linkText("Plants")).click();
     }
 
     @Then("user should be navigated to plants page")
     public void user_should_be_navigated_to_plants_page() {
-        if (driver.getCurrentUrl().contains("/plants")) {
+        if (getDriver().getCurrentUrl().contains("/plants")) {
             System.out.println("User navigated to Plants page ✅");
         }
-        driver.quit();
+        DriverFactory.quitDriver();
     }
-
-    // TC_UI_USER_11
 
     @When("user clicks Sales section")
     public void user_clicks_sales_section() {
-        driver.findElement(By.linkText("Sales")).click();
+        getDriver().findElement(By.linkText("Sales")).click();
     }
 
     @Then("user should be navigated to sales page")
     public void user_should_be_navigated_to_sales_page() {
-        if (driver.getCurrentUrl().contains("/sales")) {
+        if (getDriver().getCurrentUrl().contains("/sales")) {
             System.out.println("User navigated to Sales page ✅");
         }
-        driver.quit();
+        DriverFactory.quitDriver();
     }
 }

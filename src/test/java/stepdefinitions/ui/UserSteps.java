@@ -28,7 +28,19 @@ public class UserSteps {
     @When("user navigates to {string}")
     public void user_navigates_to(String urlPath) {
         ensureDriver();
-        DriverFactory.getDriver().get("http://localhost:8080" + urlPath);
+        String targetUrl = urlPath;
+        if (urlPath.startsWith("ui/"))
+            targetUrl = "/" + urlPath;
+        else if (!urlPath.startsWith("/"))
+            targetUrl = "/ui/" + urlPath.toLowerCase();
+
+        DriverFactory.getDriver().get("http://localhost:8080" + targetUrl);
+    }
+
+    @When("user navigates to the Dashboard")
+    @When("user navigates to dashboard page")
+    public void user_navigates_to_dashboard_alias() {
+        user_navigates_to("/ui/dashboard");
     }
 
     @When("user clicks on {string} column header")

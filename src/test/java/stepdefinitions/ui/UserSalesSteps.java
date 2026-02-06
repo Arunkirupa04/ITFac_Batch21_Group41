@@ -239,11 +239,7 @@ public class UserSalesSteps {
         }
     }
 
-    @When("user navigates to the Dashboard")
-    public void user_navigates_to_dashboard() {
-        getDriver().get("http://localhost:8080/ui/dashboard");
-        dashboardPage = new DashboardPage(getDriver());
-    }
+    // Navigation is handled in UserSteps.java
 
     @When("user clicks on {string} in sidebar")
     public void user_clicks_on_sidebar_link(String linkName) {
