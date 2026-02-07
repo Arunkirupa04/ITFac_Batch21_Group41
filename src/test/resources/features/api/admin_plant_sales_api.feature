@@ -31,12 +31,7 @@ Feature: Admin Plant and Sales Management APIs
   @TC_API_ADMIN_32
   Scenario: Verify admin can sell plant and update inventory
     Given a plant exists with ID 1 and sufficient stock
-    When admin sends a POST request to "/api/sales/plant/1" with body:
-      """
-      {
-        "quantity": 2
-      }
-      """
+    When admin sends a POST request to "/api/sales/plant/1" with quantity 2
     Then the response status code should be 201
     And the sale should be created and inventory reduced
 
@@ -56,13 +51,13 @@ Feature: Admin Plant and Sales Management APIs
   @TC_API_ADMIN_35
   Scenario: Verify retrieval of an existing sale as Admin
     Given a sale exists with ID 1
-    When admin sends a GET request to "/api/sales/1"
+    When admin sends a GET request to retrieve the sale
     Then the response status code should be 200
     And the response should contain the details of sale ID 1
 
   @TC_API_ADMIN_36
   Scenario: Verify sale deletion as Admin
     Given a sale exists with ID 1
-    When admin sends a DELETE request to "/api/sales/1"
+    When admin sends a DELETE request to remove the sale
     Then the response status code should be 200 or 204
-    And the sale with ID 1 should no longer exist
+    And the sale should no longer exist

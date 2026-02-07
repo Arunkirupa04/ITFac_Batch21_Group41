@@ -27,7 +27,8 @@ public class CategoriesPage {
     private By nameColumnHeader = By.xpath("//th//a[contains(@href,'sortField=name')]");
     private By parentColumnHeader = By.xpath("//th//a[contains(@href,'sortField=parent')]");
     private By editButtons = By.cssSelector("a.btn-outline-primary, a[href*='/edit/']");
-    private By deleteButtons = By.cssSelector("button.btn-outline-danger, a[href*='/delete/'], button[contains(text(),'Delete')]");
+    private By deleteButtons = By
+            .cssSelector("button.btn-outline-danger, a[href*='/delete/'], button[contains(text(),'Delete')]");
     private By sortIndicator = By.xpath("//span[text()=' ↑' or text()=' ↓']");
     private By paginationLinks = By.cssSelector(".pagination a");
     private By emptyMessage = By.xpath("//td[contains(text(),'No category found')]");
@@ -130,7 +131,13 @@ public class CategoriesPage {
     }
 
     public void clickPaginationPage(int pageNumber) {
-        driver.findElement(By.linkText(String.valueOf(pageNumber))).click();
+        WebElement pageLink = driver.findElement(By.linkText(String.valueOf(pageNumber)));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", pageLink);
+        try {
+            pageLink.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", pageLink);
+        }
     }
 
     // ---------- Table Operations ----------
@@ -206,13 +213,16 @@ public class CategoriesPage {
 
     public boolean isSortedById(String direction) {
         List<Integer> ids = getCategoryIds();
-        if (ids.size() <= 1) return true;
+        if (ids.size() <= 1)
+            return true;
 
         for (int i = 0; i < ids.size() - 1; i++) {
             if (direction.equalsIgnoreCase("ascending")) {
-                if (ids.get(i) > ids.get(i + 1)) return false;
+                if (ids.get(i) > ids.get(i + 1))
+                    return false;
             } else if (direction.equalsIgnoreCase("descending")) {
-                if (ids.get(i) < ids.get(i + 1)) return false;
+                if (ids.get(i) < ids.get(i + 1))
+                    return false;
             }
         }
         return true;
@@ -220,14 +230,17 @@ public class CategoriesPage {
 
     public boolean isSortedByName(String direction) {
         List<String> names = getCategoryNames();
-        if (names.size() <= 1) return true;
+        if (names.size() <= 1)
+            return true;
 
         for (int i = 0; i < names.size() - 1; i++) {
             int comparison = names.get(i).compareToIgnoreCase(names.get(i + 1));
             if (direction.equalsIgnoreCase("ascending")) {
-                if (comparison > 0) return false;
+                if (comparison > 0)
+                    return false;
             } else if (direction.equalsIgnoreCase("descending")) {
-                if (comparison < 0) return false;
+                if (comparison < 0)
+                    return false;
             }
         }
         return true;
@@ -235,14 +248,17 @@ public class CategoriesPage {
 
     public boolean isSortedByParent(String direction) {
         List<String> parents = getParentNames();
-        if (parents.size() <= 1) return true;
+        if (parents.size() <= 1)
+            return true;
 
         for (int i = 0; i < parents.size() - 1; i++) {
             int comparison = parents.get(i).compareToIgnoreCase(parents.get(i + 1));
             if (direction.equalsIgnoreCase("ascending")) {
-                if (comparison > 0) return false;
+                if (comparison > 0)
+                    return false;
             } else if (direction.equalsIgnoreCase("descending")) {
-                if (comparison < 0) return false;
+                if (comparison < 0)
+                    return false;
             }
         }
         return true;
@@ -280,8 +296,9 @@ public class CategoriesPage {
 
     public boolean areEditButtonsVisible() {
         List<WebElement> buttons = getEditButtons();
-        if (buttons.isEmpty()) return false;
-        
+        if (buttons.isEmpty())
+            return false;
+
         // Check if any button is actually visible and enabled (not disabled)
         for (WebElement btn : buttons) {
             try {
@@ -301,8 +318,9 @@ public class CategoriesPage {
 
     public boolean areDeleteButtonsVisible() {
         List<WebElement> buttons = getDeleteButtons();
-        if (buttons.isEmpty()) return false;
-        
+        if (buttons.isEmpty())
+            return false;
+
         // Check if any button is actually visible and enabled (not disabled)
         for (WebElement btn : buttons) {
             try {

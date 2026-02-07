@@ -1,4 +1,4 @@
-@ui @plants @admin
+@ui @plants @admin @sachini
 Feature: Add / Edit Plant - Admin
 
   Background:

@@ -1,4 +1,4 @@
-@ui @plants @user
+@ui @plants @user @sachini
 Feature: Plants Page - User
 
   Background:

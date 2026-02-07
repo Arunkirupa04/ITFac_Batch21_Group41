@@ -30,8 +30,7 @@ public class PlantFormPage {
 
     // Validation
     private By validationMessage = By.cssSelector(
-            ".alert-danger, .invalid-feedback, .error-message, .text-danger"
-    );
+            ".alert-danger, .invalid-feedback, .error-message, .text-danger");
     private By successMessage = By.cssSelector(".alert-success");
 
     // ---------- Validations ----------
@@ -59,6 +58,17 @@ public class PlantFormPage {
 
     public boolean isAnyValidationErrorDisplayed() {
         return driver.findElements(validationMessage).size() > 0;
+    }
+
+    public String getAnyValidationErrorText() {
+        java.util.List<WebElement> errors = driver.findElements(validationMessage);
+        if (errors.isEmpty())
+            return "No error visible";
+        StringBuilder sb = new StringBuilder();
+        for (WebElement e : errors) {
+            sb.append(e.getText()).append(" ");
+        }
+        return sb.toString().trim();
     }
 
     // ---------- Actions ----------
@@ -99,26 +109,38 @@ public class PlantFormPage {
     }
 
     public void selectSubCategory(String subCategoryName) {
+        if (subCategoryName == null || subCategoryName.isEmpty())
+            return;
+
         try {
-            Select select = new Select(driver.findElement(categorySelect));
-            try {
-                select.selectByVisibleText(subCategoryName);
-            } catch (Exception e) {
-                boolean found = false;
-                for (WebElement option : select.getOptions()) {
-                    if (option.getText().contains(subCategoryName)) {
-                        select.selectByVisibleText(option.getText());
+            // Wait a bit for sub-category options to populate if it's dynamic
+            Thread.sleep(1000);
+            // Try all selects on the page
+            java.util.List<WebElement> selects = driver.findElements(By.tagName("select"));
+
+            boolean found = false;
+
+            for (WebElement selectEl : selects) {
+                Select sel = new Select(selectEl);
+                for (WebElement option : sel.getOptions()) {
+                    if (option.getText().trim().equalsIgnoreCase(subCategoryName) ||
+                            option.getText().contains(subCategoryName)) {
+                        sel.selectByVisibleText(option.getText());
                         found = true;
+                        System.out.println("✅ Selected Sub-Category: " + subCategoryName + " in select: "
+                                + selectEl.getAttribute("name"));
                         break;
                     }
                 }
-                if (!found) {
-                    throw new NoSuchElementException("Cannot find sub-cat: " + subCategoryName);
-                }
+                if (found)
+                    break;
             }
-            System.out.println("✅ Selected Sub-Category: " + subCategoryName);
+
+            if (!found) {
+                System.out.println("⚠️ Could not find sub-category: " + subCategoryName + " in any dropdown.");
+            }
         } catch (Exception e) {
-            System.out.println("⚠️ Could not select sub-category: " + subCategoryName + " (" + e.getMessage() + ")");
+            System.out.println("⚠️ Error selecting sub-category: " + e.getMessage());
         }
     }
 

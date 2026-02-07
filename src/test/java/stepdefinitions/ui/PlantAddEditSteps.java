@@ -7,13 +7,14 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.PlantFormPage;
 import pages.PlantsPage;
+import utils.DriverFactory;
 
 import java.time.Duration;
 
 public class PlantAddEditSteps {
 
-    // Share driver from AdminLoginSteps
-    WebDriver driver = AdminLoginSteps.driver;
+    // Share driver from DriverFactory
+    WebDriver driver;
 
     PlantFormPage plantFormPage;
     PlantsPage plantsPage;
@@ -25,7 +26,8 @@ public class PlantAddEditSteps {
     private String existingPlantName;
 
     private void refreshPages() {
-        this.driver = AdminLoginSteps.driver;
+        DriverFactory.initDriver();
+        this.driver = DriverFactory.getDriver();
         if (driver != null) {
             plantFormPage = new PlantFormPage(driver);
             plantsPage = new PlantsPage(driver);
@@ -95,8 +97,16 @@ public class PlantAddEditSteps {
 
             // Back to list and search again
             plantsPage.open();
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+            }
             plantsPage.enterPlantName(existingPlantName);
             plantsPage.clickSearch();
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+            }
         }
 
         Assert.assertTrue("Plant Rose still not visible after creating/searching",
@@ -129,7 +139,37 @@ public class PlantAddEditSteps {
         Assert.assertTrue("Not on Edit Plant page", plantFormPage.isOnEditPlantPage());
     }
 
-    // ✅ FIXED: make name unique for normal add scenario (avoids duplicate name issue)
+    @When("admin clicks add plant button")
+    public void admin_clicks_add_plant_button() {
+        refreshPages();
+        plantsPage.clickAddPlant();
+    }
+
+    @And("admin enters plant details")
+    public void admin_enters_plant_details() {
+        refreshPages();
+        String name = "Rose_" + System.currentTimeMillis();
+        this.lastEnteredName = name;
+        plantFormPage.enterPlantName(name);
+        plantFormPage.selectCategory("Indoor");
+        plantFormPage.enterPrice("20");
+        plantFormPage.enterQuantity("50");
+    }
+
+    @And("admin enters plant details with sub category")
+    public void admin_enters_plant_details_with_sub_category() {
+        refreshPages();
+        String name = "Bonsai_" + System.currentTimeMillis();
+        this.lastEnteredName = name;
+        plantFormPage.enterPlantName(name);
+        plantFormPage.selectCategory("Indoor");
+        plantFormPage.selectSubCategory("Bonsai");
+        plantFormPage.enterPrice("50");
+        plantFormPage.enterQuantity("10");
+    }
+
+    // ✅ FIXED: make name unique for normal add scenario (avoids duplicate name
+    // issue)
     // If user passes empty/null -> keep as-is for validation test cases.
     @When("admin enters plant name {string}")
     public void admin_enters_plant_name(String name) {
@@ -211,7 +251,8 @@ public class PlantAddEditSteps {
                 } else {
                     System.out.println("⚠️ No visible validation errors found by locator.");
                 }
-            } catch (Exception ignore) {}
+            } catch (Exception ignore) {
+            }
 
             String src = driver.getPageSource().toLowerCase();
             System.out.println("🔎 Page contains 'error'?: " + src.contains("error"));
@@ -285,5 +326,17 @@ public class PlantAddEditSteps {
     public void validation_should_be_shown() {
         refreshPages();
         Assert.assertTrue("Validation message not shown", plantFormPage.isAnyValidationErrorDisplayed());
+    }
+
+    @Then("plant {string} should be added to the list")
+    public void plant_should_be_added_to_the_list(String plantName) {
+        refreshPages();
+        // Use lastEnteredName if we used unique name, otherwise use plantName
+        String nameToSearch = (lastEnteredName != null) ? lastEnteredName : plantName;
+
+        plantsPage.enterPlantName(nameToSearch);
+        plantsPage.clickSearch();
+        Assert.assertTrue("Plant not found in list: " + nameToSearch,
+                plantsPage.isPlantDisplayed(nameToSearch));
     }
 }

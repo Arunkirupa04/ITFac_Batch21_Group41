@@ -41,7 +41,10 @@ public class PlantsPage {
     private By addPlantButton = By.xpath("//a[contains(.,'Add') and contains(.,'Plant')]");
     private By editButtons = By.xpath("//a[contains(@href,'/ui/plants/edit') or contains(.,'Edit')]");
     private By deleteButtons = By.xpath(
-            "//button[contains(@data-bs-target,'delete') or contains(.,'Delete')] | //a[contains(.,'Delete')]");
+            "//button[contains(@data-bs-target,'delete') or contains(.,'Delete') or contains(@class,'delete') or contains(@class,'btn-danger')] | "
+                    +
+                    "//a[contains(.,'Delete') or contains(@class,'delete')] | " +
+                    "//*[contains(@class,'fa-trash') or contains(@class,'trash')]");
 
     // Low stock badge
     private By lowBadge = By.xpath(
@@ -89,7 +92,17 @@ public class PlantsPage {
     }
 
     public void clickSearch() {
-        driver.findElement(searchButton).click();
+        WebElement btn = driver.findElement(searchButton);
+        try {
+            btn.click();
+        } catch (ElementClickInterceptedException e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btn);
+        }
+        // Wait for table to reload (briefly)
+        try {
+            Thread.sleep(500);
+        } catch (Exception ignore) {
+        }
     }
 
     public void clickReset() {
@@ -97,16 +110,26 @@ public class PlantsPage {
     }
 
     // ---------- Sorting ----------
+    private void clickSortHeader(By locator) {
+        WebElement header = driver.findElement(locator);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", header);
+        try {
+            header.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", header);
+        }
+    }
+
     public void sortByName() {
-        driver.findElement(sortNameLink).click();
+        clickSortHeader(sortNameLink);
     }
 
     public void sortByPrice() {
-        driver.findElement(sortPriceLink).click();
+        clickSortHeader(sortPriceLink);
     }
 
     public void sortByStock() {
-        driver.findElement(sortStockLink).click();
+        clickSortHeader(sortStockLink);
     }
 
     // ---------- Table helpers ----------
@@ -208,7 +231,23 @@ public class PlantsPage {
 
     // ---------- Navigation Actions ----------
     public void clickAddPlant() {
-        driver.findElement(addPlantButton).click();
+        // Wait for element to be present and clickable
+        for (int i = 0; i < 3; i++) {
+            try {
+                WebElement btn = driver.findElement(addPlantButton);
+                if (btn.isDisplayed()) {
+                    btn.click();
+                    return;
+                }
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(500);
+                } catch (Exception ignore) {
+                }
+            }
+        }
+        // Final fallback
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", driver.findElement(addPlantButton));
     }
 
     public void clickEditPlant(String plantName) {
