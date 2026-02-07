@@ -1,4 +1,4 @@
-@admin @AdminSell
+@admin @AdminSell 
 Feature: Admin Sell Plant
   As an admin
   I want to sell plants

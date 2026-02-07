@@ -16,4 +16,13 @@ public class Hooks {
         DriverFactory.quitDriver();
     }
 
+    @Before("@AdminSell or @AdminSellValidation or @UserSales or @UserAccess")
+    public void setupGeneric() {
+        DriverFactory.initDriver();
+    }
+
+    @After("@AdminSell or @AdminSellValidation or @UserSales or @UserAccess")
+    public void tearDownGeneric() {
+        DriverFactory.quitDriver();
+    }
 }
