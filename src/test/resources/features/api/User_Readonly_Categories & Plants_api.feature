@@ -1,4 +1,4 @@
-@UserAPI
+@UserAPI @sachini
 Feature: User Readonly Access for Categories & Plants
 
   Background:

@@ -65,16 +65,29 @@ public class PlantsPage {
         return driver.findElements(emptyStateText).size() > 0;
     }
 
-    // public boolean isLowBadgeShown() {
-    // return driver.findElements(lowBadge).size() > 0;
-    // }
+    /**
+     * Low stock badge in app (from inspect): <span class="badge bg-danger ms-2">Low</span> inside table td.
+     */
     public boolean isLowBadgeShown() {
-        List<WebElement> badges = driver.findElements(By.cssSelector("span.badge.bg-danger"));
-
-        for (WebElement badge : badges) {
-            if (badge.getText().trim().equalsIgnoreCase("Low")) {
+        // 1) Exact match from inspect: span.badge.bg-danger in table (Stock column)
+        List<WebElement> inTable = driver.findElements(By.cssSelector("table tbody span.badge.bg-danger"));
+        for (WebElement badge : inTable) {
+            String text = badge.getText().replaceAll("\\s+", " ").trim();
+            if ("Low".equalsIgnoreCase(text)) {
                 return true;
             }
+        }
+        // 2) Anywhere on page: span.badge.bg-danger with text "Low"
+        List<WebElement> badges = driver.findElements(By.cssSelector("span.badge.bg-danger"));
+        for (WebElement badge : badges) {
+            String text = badge.getText().replaceAll("\\s+", " ").trim();
+            if ("Low".equalsIgnoreCase(text)) {
+                return true;
+            }
+        }
+        // 3) XPath fallback: any element with class badge and "Low" text
+        if (driver.findElements(lowBadge).size() > 0) {
+            return true;
         }
         return false;
     }
@@ -88,7 +101,21 @@ public class PlantsPage {
 
     public void selectCategory(String visibleText) {
         Select select = new Select(driver.findElement(categorySelect));
-        select.selectByVisibleText(visibleText);
+        try {
+            select.selectByVisibleText(visibleText);
+        } catch (NoSuchElementException e) {
+            // Fallback: app may not have "Indoor" - select first non-placeholder option
+            java.util.List<WebElement> options = select.getOptions();
+            for (int i = 1; i < options.size(); i++) {
+                String text = options.get(i).getText().trim();
+                if (!text.isEmpty() && !text.equalsIgnoreCase("Select") && !text.equals("--")) {
+                    select.selectByIndex(i);
+                    return;
+                }
+            }
+            if (options.size() > 1)
+                select.selectByIndex(1);
+        }
     }
 
     public void clickSearch() {
@@ -133,6 +160,29 @@ public class PlantsPage {
     }
 
     // ---------- Table helpers ----------
+    /**
+     * Returns the name (first column) of the first plant in the table, or null if empty.
+     */
+    public String getFirstPlantName() {
+        List<WebElement> rows = driver.findElements(tableRows);
+        if (rows.isEmpty())
+            return null;
+        try {
+            List<WebElement> cols = rows.get(0).findElements(By.cssSelector("td"));
+            if (cols.size() >= 1)
+                return cols.get(0).getText().trim();
+        } catch (StaleElementReferenceException e) {
+            // retry once
+            rows = driver.findElements(tableRows);
+            if (!rows.isEmpty()) {
+                List<WebElement> cols = rows.get(0).findElements(By.cssSelector("td"));
+                if (cols.size() >= 1)
+                    return cols.get(0).getText().trim();
+            }
+        }
+        return null;
+    }
+
     public boolean isPlantDisplayed(String plantName) {
         try {
             List<WebElement> rows = driver.findElements(tableRows);

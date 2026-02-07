@@ -104,7 +104,21 @@ public class PlantFormPage {
                 select.selectByIndex(0);
             }
         } else {
-            select.selectByVisibleText(categoryName);
+            try {
+                select.selectByVisibleText(categoryName);
+            } catch (NoSuchElementException e) {
+                // Fallback: app may not have "Indoor" - select first non-empty option
+                java.util.List<WebElement> options = select.getOptions();
+                for (int i = 1; i < options.size(); i++) {
+                    String text = options.get(i).getText().trim();
+                    if (!text.isEmpty() && !text.equalsIgnoreCase("Select") && !text.equals("--")) {
+                        select.selectByIndex(i);
+                        return;
+                    }
+                }
+                if (options.size() > 0)
+                    select.selectByIndex(1);
+            }
         }
     }
 

@@ -319,6 +319,18 @@ public class PlantAddEditSteps {
     @Then("plant should be updated successfully")
     public void plant_should_be_updated_successfully() {
         refreshPages();
+        // Wait for redirect after save (app may take a moment)
+        try {
+            for (int i = 0; i < 10; i++) {
+                if (driver.getCurrentUrl().contains("/ui/plants") && !driver.getCurrentUrl().contains("/edit")) {
+                    break;
+                }
+                Thread.sleep(1000);
+                refreshPages();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         Assert.assertTrue("Not redirected to Plants page after update", plantsPage.isOnPlantsPage());
     }
 

@@ -1,4 +1,4 @@
-@AdminAPI
+@AdminAPI @sachini
 Feature: Admin Category & Plant APIs
 
   Background:
