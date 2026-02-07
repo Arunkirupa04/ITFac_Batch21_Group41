@@ -47,6 +47,7 @@ public class AdminAuthAPISteps extends BaseAPISteps {
     }
 
     @Given("admin is logged in with JWT")
+    @Given("admin is authenticated via API")
     public void admin_logged_in_with_jwt() {
         if (adminToken == null) {
             // Self-heal/Bootstrap if token is missing

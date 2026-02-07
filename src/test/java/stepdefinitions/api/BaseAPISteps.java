@@ -8,4 +8,5 @@ public class BaseAPISteps extends ApiBase {
     protected static String userToken;
     protected static int createdSaleId;
     protected static int foundPlantId;
+    protected static Integer dynamicSaleId;
 }

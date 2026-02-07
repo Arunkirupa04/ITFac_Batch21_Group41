@@ -6,13 +6,13 @@ import utils.DriverFactory;
 
 public class Hooks {
 
-    @Before("@AdminSales")
-    public void setup() {
+    @Before("@ui")
+    public void setupUI() {
         DriverFactory.initDriver();
     }
 
-    @After("@AdminSales")
-    public void tearDown() {
+    @After("@ui")
+    public void tearDownUI() {
         DriverFactory.quitDriver();
     }
 

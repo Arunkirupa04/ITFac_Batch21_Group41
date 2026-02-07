@@ -49,6 +49,9 @@ public class UserSalesRestrictionAPISteps extends BaseAPISteps {
 
     @When("user sends a GET request to {string}")
     public void user_sends_get(String endpoint) {
+        if (dynamicSaleId != null && endpoint.equals("/api/sales/1")) {
+            endpoint = "/api/sales/" + dynamicSaleId;
+        }
         response = request.get(endpoint);
     }
 
@@ -64,6 +67,9 @@ public class UserSalesRestrictionAPISteps extends BaseAPISteps {
 
     @When("user sends a DELETE request to {string}")
     public void user_sends_delete(String endpoint) {
+        if (dynamicSaleId != null && endpoint.equals("/api/sales/1")) {
+            endpoint = "/api/sales/" + dynamicSaleId;
+        }
         response = request.delete(endpoint);
     }
 }

@@ -2,34 +2,17 @@ package stepdefinitions.api;
 
 import io.cucumber.java.en.*;
 import io.restassured.response.Response;
-import io.restassured.http.ContentType;
 import org.junit.Assert;
 import java.util.Map;
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 public class AdminPlantSalesAPISteps extends BaseAPISteps {
 
-    @Given("admin is authenticated via API")
-    public void admin_is_authenticated_via_api() {
-        String loginBody = "{\"username\": \"admin\", \"password\": \"admin123\"}";
-        Response loginResponse = given()
-                .baseUri(BASE_URL)
-                .contentType(ContentType.JSON)
-                .body(loginBody)
-                .post("/api/auth/login");
-
-        Assert.assertEquals("Login failed!", 200, loginResponse.getStatusCode());
-        adminToken = loginResponse.jsonPath().getString("token");
-
-        request = given()
-                .baseUri(BASE_URL)
-                .header("Authorization", "Bearer " + adminToken)
-                .contentType(ContentType.JSON);
-    }
-
     @When("admin sends a GET request to {string}")
     public void admin_sends_get(String endpoint) {
+        if (dynamicSaleId != null && endpoint.equals("/api/sales/1")) {
+            endpoint = "/api/sales/" + dynamicSaleId;
+        }
         response = request.get(endpoint);
     }
 
@@ -83,18 +66,7 @@ public class AdminPlantSalesAPISteps extends BaseAPISteps {
 
     @When("admin sends a POST request to {string} with body:")
     public void admin_sends_post_with_body(String endpoint, String body) {
-        if (foundPlantId != 0 && endpoint.contains("/api/sales/plant/")) {
-            endpoint = endpoint.replaceFirst("/api/sales/plant/\\d+", "/api/sales/plant/" + foundPlantId);
-        }
-        // If the API documentation says quantity is a query param, we should extract it
-        // or just use this for other POSTs.
-        // For compatibility with current feature file structure:
-        if (body.contains("\"quantity\":")) {
-            String qtyStr = body.replaceAll("(?s).*\"quantity\":\\s*(\\d+).*", "$1");
-            response = request.queryParam("quantity", Integer.parseInt(qtyStr)).post(endpoint);
-        } else {
-            response = request.body(body).post(endpoint);
-        }
+        response = request.body(body).post(endpoint);
     }
 
     @And("the sale should be created and inventory reduced")
@@ -120,23 +92,23 @@ public class AdminPlantSalesAPISteps extends BaseAPISteps {
 
     @And("the response should contain the details of sale ID {int}")
     public void verify_sale_details(int id) {
-        // If the step mentions ID 1 but we discovered/created a different one to make
-        // the test pass
-        int expectedId = (id == 1 && createdSaleId != 0) ? createdSaleId : id;
-        response.then().body("id", equalTo(expectedId));
+        response.then().body("id", equalTo(id));
     }
 
     @When("admin sends a DELETE request to {string}")
     public void admin_sends_delete(String endpoint) {
+        if (dynamicSaleId != null && endpoint.equals("/api/sales/1")) {
+            endpoint = "/api/sales/" + dynamicSaleId;
+        }
         response = request.delete(endpoint);
     }
-//
-//    @Then("the response status code should be {int} or {int}")
-//    public void verify_status_range(int code1, int code2) {
-//        int actual = response.getStatusCode();
-//        Assert.assertTrue("Status code " + actual + " not in expected range",
-//                actual == code1 || actual == code2);
-//    }
+    //
+    // @Then("the response status code should be {int} or {int}")
+    // public void verify_status_range(int code1, int code2) {
+    // int actual = response.getStatusCode();
+    // Assert.assertTrue("Status code " + actual + " not in expected range",
+    // actual == code1 || actual == code2);
+    // }
 
     @When("admin sends a DELETE request to remove the sale")
     public void delete_created_sale() {
@@ -151,7 +123,8 @@ public class AdminPlantSalesAPISteps extends BaseAPISteps {
 
     @And("the sale with ID {int} should no longer exist")
     public void verify_sale_deleted(int id) {
-        Response check = request.get("/api/sales/" + id);
+        int targetId = (dynamicSaleId != null && id == 1) ? dynamicSaleId : id;
+        Response check = request.get("/api/sales/" + targetId);
         Assert.assertTrue(check.getStatusCode() == 404 || check.getStatusCode() == 500);
     }
 }

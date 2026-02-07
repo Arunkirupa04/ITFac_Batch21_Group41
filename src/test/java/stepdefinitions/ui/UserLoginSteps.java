@@ -14,6 +14,14 @@ import java.time.Duration;
 
 public class UserLoginSteps {
 
+    @Given("user is logged in")
+    public void user_is_logged_in() throws InterruptedException {
+        user_is_on_login_page();
+        user_enters_credentials("testuser", "test123");
+        user_clicks_login_button();
+        Thread.sleep(2000);
+    }
+
     private WebDriver getDriver() {
         DriverFactory.initDriver();
         return DriverFactory.getDriver();
@@ -53,7 +61,7 @@ public class UserLoginSteps {
 
     @And("close the browser")
     public void close_the_browser() {
-        DriverFactory.quitDriver();
+        // Handled by Hooks
     }
 
     // TC_UI_USER_02,03
@@ -65,7 +73,6 @@ public class UserLoginSteps {
         } else {
             System.out.println("Expected error message NOT found ❌");
         }
-        DriverFactory.quitDriver();
     }
 
     // TC_UI_USER_04
@@ -95,7 +102,6 @@ public class UserLoginSteps {
         } else {
             System.out.println("Logout verification failed ❌");
         }
-        DriverFactory.quitDriver();
     }
 
     // TC_UI_USER_05
@@ -114,7 +120,6 @@ public class UserLoginSteps {
         } else {
             System.out.println("Redirection failed ❌");
         }
-        DriverFactory.quitDriver();
     }
 
     @Then("dashboard should be displayed with summary cards")
@@ -122,7 +127,6 @@ public class UserLoginSteps {
         if (getDriver().getPageSource().contains("Dashboard")) {
             System.out.println("Dashboard loaded for user ✅");
         }
-        DriverFactory.quitDriver();
     }
 
     // TC_UI_USER_07
@@ -134,7 +138,6 @@ public class UserLoginSteps {
                 && getDriver().getPageSource().contains("Sales")) {
             System.out.println("Summary cards visible for user ✅");
         }
-        DriverFactory.quitDriver();
     }
 
     @Then("admin action buttons should not be visible")
@@ -148,7 +151,6 @@ public class UserLoginSteps {
         } else {
             System.out.println("Admin action buttons visible ❌");
         }
-        DriverFactory.quitDriver();
     }
 
     // TC_UI_USER_09
@@ -163,7 +165,6 @@ public class UserLoginSteps {
         if (getDriver().getCurrentUrl().contains("/categories")) {
             System.out.println("User navigated to Categories page ✅");
         }
-        DriverFactory.quitDriver();
     }
 
     @When("user clicks Plants section")
@@ -176,7 +177,6 @@ public class UserLoginSteps {
         if (getDriver().getCurrentUrl().contains("/plants")) {
             System.out.println("User navigated to Plants page ✅");
         }
-        DriverFactory.quitDriver();
     }
 
     @When("user clicks Sales section")
@@ -189,6 +189,5 @@ public class UserLoginSteps {
         if (getDriver().getCurrentUrl().contains("/sales")) {
             System.out.println("User navigated to Sales page ✅");
         }
-        DriverFactory.quitDriver();
     }
 }

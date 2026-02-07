@@ -156,11 +156,23 @@ public class SalesPage {
     }
 
     public void clickNextPage() {
-        driver.findElement(nextPageBtn).click();
+        WebElement btn = driver.findElement(nextPageBtn);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", btn);
+        try {
+            btn.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btn);
+        }
     }
 
     public void clickPreviousPage() {
-        driver.findElement(previousPageBtn).click();
+        WebElement btn = driver.findElement(previousPageBtn);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", btn);
+        try {
+            btn.click();
+        } catch (Exception e) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btn);
+        }
     }
 
     // ---------- Visibility Checks ----------
