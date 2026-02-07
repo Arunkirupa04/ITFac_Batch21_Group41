@@ -98,7 +98,11 @@ public class AdminSellSteps {
         getDriver().findElement(By.cssSelector("button[type='submit']")).click();
 
         // Wait for redirect away from login
-        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/ui/login")));
+        try {
+            wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/ui/login")));
+        } catch (org.openqa.selenium.TimeoutException e) {
+            throw new AssertionError("Non-admin login failed (testuser/test123). Ensure this user exists in the app and login works. Current URL: " + getDriver().getCurrentUrl(), e);
+        }
     }
 
     @Given("a sale exists in the system")
