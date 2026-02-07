@@ -67,7 +67,8 @@ public class SellPlantPage {
 
         for (WebElement option : select.getOptions()) {
             String optionText = option.getText();
-            if (optionText.contains(plantName)) {
+            // Match "PlantName (Stock: X)" exactly at the start
+            if (optionText.startsWith(plantName + " (") || optionText.equals(plantName)) {
                 // Extract number from format like "Lemon (Stock: 10)"
                 // Using regex to capture the number after "Stock:"
                 String stockStr = optionText.replaceAll(".*Stock:\\s*(\\d+).*", "$1");
