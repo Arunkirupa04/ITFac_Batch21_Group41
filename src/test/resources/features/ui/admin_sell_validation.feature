@@ -33,18 +33,30 @@ Feature: Admin Sell Plant Validation
     And admin saves the sale
     Then an error message should be displayed
 
-  @TC_UI_ADMIN_66
-  Scenario: Verify Zero Quantity Validation
-    Given admin is on the sell plant page
-    When admin selects a plant
-    And admin enters quantity "0"
-    And admin saves the sale
-    Then an error message should be displayed
+#  @TC_UI_ADMIN_66
+#  Scenario: Verify Zero Quantity Validation
+#    Given admin is on the sell plant page
+#    When admin selects a plant
+#    And admin enters quantity "0"
+#    And admin saves the sale
+#    Then an error message should be displayed
+#
+#  @TC_UI_ADMIN_67
+#  Scenario: Verify Negative Quantity Validation
+#    Given admin is on the sell plant page
+#    When admin selects a plant
+#    And admin enters quantity "-1"
+#    And admin saves the sale
+#    Then an error message should be displayed
 
-  @TC_UI_ADMIN_67
-  Scenario: Verify Negative Quantity Validation
+  @TC_UI_ADMIN_66 @TC_UI_ADMIN_67
+  Scenario Outline: Verify Quantity Validation
     Given admin is on the sell plant page
     When admin selects a plant
-    And admin enters quantity "-1"
+    And admin enters quantity "<quantity>"
     And admin saves the sale
     Then an error message should be displayed
+    Examples:
+      | quantity |
+      | 0        |
+      | -1       |

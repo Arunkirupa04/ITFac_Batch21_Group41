@@ -109,8 +109,8 @@ public class AdminSalesSteps {
         getSalesPage().clickColumnHeader(columnName);
     }
 
-    @Then("sales should be sorted alphabetically by plant name")
-    public void sales_should_be_sorted_alphabetically_by_plant_name() {
+    @Then("sales should be sorted by plant name alphabetically")
+    public void sales_should_be_sorted_by_plant_name_alphabetically() {
         List<String> actualData = getSalesPage().getColumnData(1); // Assuming 1st column is Plant
         List<String> sortedData = new ArrayList<>(actualData);
         Collections.sort(sortedData);
