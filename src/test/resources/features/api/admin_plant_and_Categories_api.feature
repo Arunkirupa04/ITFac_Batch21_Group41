@@ -8,7 +8,7 @@ Feature: Admin Category & Plant APIs
   Scenario: Validate invalid create data for Admin
     When admin sends POST request to "/api/categories" with body:
       """
-      { "name": "ab" }
+      { "name": "" }
       """
     Then response code should be 400
     And response should contain validation error

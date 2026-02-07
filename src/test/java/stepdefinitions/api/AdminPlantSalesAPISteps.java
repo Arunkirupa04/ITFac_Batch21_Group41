@@ -77,11 +77,24 @@ public class AdminPlantSalesAPISteps extends BaseAPISteps {
 
     @Given("a plant exists with ID {int} and limited stock")
     public void plant_exists_limited_stock(int id) {
-        // Assume state or verification logic
+        Response check = request.get("/api/plants/" + id);
+        if (check.getStatusCode() == 200) {
+            foundPlantId = id;
+        } else {
+            Response all = request.get("/api/plants");
+            if (all.getStatusCode() == 200 && !all.jsonPath().getList("$").isEmpty()) {
+                foundPlantId = all.jsonPath().getInt("[0].id");
+            } else {
+                foundPlantId = id;
+            }
+        }
     }
 
     @When("admin sends a POST request to {string} with quantity more than available stock")
     public void admin_sells_excessive(String endpoint) {
+        if (foundPlantId != 0 && endpoint.contains("/api/sales/plant/")) {
+            endpoint = endpoint.replaceFirst("/api/sales/plant/\\d+", "/api/sales/plant/" + foundPlantId);
+        }
         response = request.queryParam("quantity", 999999).post(endpoint);
     }
 
@@ -92,7 +105,8 @@ public class AdminPlantSalesAPISteps extends BaseAPISteps {
 
     @And("the response should contain the details of sale ID {int}")
     public void verify_sale_details(int id) {
-        response.then().body("id", equalTo(id));
+        int expectedId = (createdSaleId != 0) ? createdSaleId : id;
+        response.then().body("id", equalTo(expectedId));
     }
 
     @When("admin sends a DELETE request to {string}")

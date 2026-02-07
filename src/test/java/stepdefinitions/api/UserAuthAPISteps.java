@@ -45,6 +45,28 @@ public class UserAuthAPISteps extends BaseAPISteps {
                 .contentType(ContentType.JSON);
     }
 
+    @Given("an existing category is available for user")
+    public void existing_category_available_for_user() {
+        user_logged_in_with_jwt();
+        response = request.get("/api/categories");
+        response.then().statusCode(200);
+        java.util.List<Integer> ids = response.jsonPath().getList("id");
+        if (ids == null || ids.isEmpty()) {
+            throw new AssertionError("No categories found from GET /api/categories. Ensure at least one category exists.");
+        }
+        existingCategoryId = ids.get(0);
+    }
+
+    @When("user sends GET request to the existing category")
+    public void user_sends_get_existing_category() {
+        response = request.get("/api/categories/" + existingCategoryId);
+    }
+
+    @When("user sends PUT request to the existing category with body:")
+    public void user_sends_put_existing_category(String body) {
+        response = request.body(body).put("/api/categories/" + existingCategoryId);
+    }
+
     @When("user sends GET request to {string}")
     public void user_sends_get(String endpoint) {
         response = request.get(endpoint);
@@ -58,5 +80,10 @@ public class UserAuthAPISteps extends BaseAPISteps {
     @When("user sends PUT request to {string} with body:")
     public void user_sends_put(String endpoint, String body) {
         response = request.body(body).put(endpoint);
+    }
+
+    @And("response JSON should contain the existing category id")
+    public void response_contains_existing_category_id() {
+        response.then().body("id", equalTo(existingCategoryId));
     }
 }

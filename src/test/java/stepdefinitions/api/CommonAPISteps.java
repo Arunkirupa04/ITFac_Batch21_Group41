@@ -37,12 +37,19 @@ public class CommonAPISteps extends BaseAPISteps {
             Response allSales = request.get("/api/sales");
             if (allSales.getStatusCode() == 200 && !allSales.jsonPath().getList("$").isEmpty()) {
                 createdSaleId = allSales.jsonPath().getInt("[0].id");
+                dynamicSaleId = createdSaleId;
                 System.out.println("Discovered existing sale with ID: " + createdSaleId);
             } else {
                 System.out.println("No sales found. Creating a new sale for the test...");
-                Response create = request.queryParam("quantity", 1).post("/api/sales/plant/1");
+                Response plants = request.get("/api/plants");
+                int plantId = 1;
+                if (plants.getStatusCode() == 200 && !plants.jsonPath().getList("$").isEmpty()) {
+                    plantId = plants.jsonPath().getInt("[0].id");
+                }
+                Response create = request.queryParam("quantity", 1).post("/api/sales/plant/" + plantId);
                 if (create.getStatusCode() == 201) {
                     createdSaleId = create.jsonPath().getInt("id");
+                    dynamicSaleId = createdSaleId;
                     System.out.println("Created new sale with ID: " + createdSaleId);
                 } else {
                     Assert.fail("Could not find or create a sale for the test.");
@@ -50,6 +57,7 @@ public class CommonAPISteps extends BaseAPISteps {
             }
         } else {
             createdSaleId = id;
+            dynamicSaleId = id;
         }
     }
 

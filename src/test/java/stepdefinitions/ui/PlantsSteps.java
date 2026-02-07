@@ -1,15 +1,18 @@
 package stepdefinitions.ui;
 
 import io.cucumber.java.en.*;
+import io.restassured.response.Response;
 import org.junit.Assert;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.PlantFormPage;
 import pages.PlantsPage;
+import utils.ApiBase;
 import utils.DriverFactory;
 
 import java.time.Duration;
+import java.util.concurrent.*;
 
 public class PlantsSteps {
 
@@ -22,6 +25,9 @@ public class PlantsSteps {
     private String lastSearchedPlantName;
     /** True when user role cannot add plants (e.g. "Add Plant" not visible). */
     private boolean skippedLowStockCreation;
+    /** Parent and sub-category names created via API for pagination (TC_UI_ADMIN_31). */
+    private static String paginationParentName = "PaginationParent";
+    private static String paginationSubName = "Cacti";
 
     private void refreshPages() {
         DriverFactory.initDriver();
@@ -64,6 +70,67 @@ public class PlantsSteps {
         Assert.assertTrue("Plants page not loaded", plantsPage.isOnPlantsPage());
     }
 
+    /** Create parent category and sub-category via API. Returns true if created, false if timeout/error (then use first-available in UI). */
+    private boolean ensurePaginationCategoryAndSubCategory() {
+        System.out.println("[TC_UI_ADMIN_31] Creating pagination category/sub via API...");
+        System.out.flush();
+        final boolean[] created = { false };
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<?> future = executor.submit(() -> {
+                try {
+                    Response parentRes = ApiBase.getAdminRequestSpec()
+                            .body("{\"name\":\"" + paginationParentName + "\"}")
+                            .post("/categories");
+                    int parentId = -1;
+                    if (parentRes.getStatusCode() == 201 || parentRes.getStatusCode() == 200) {
+                        try {
+                            parentId = parentRes.jsonPath().getInt("id");
+                        } catch (Exception ignored) { }
+                    }
+                    if (parentId <= 0) {
+                        Response listRes = ApiBase.getAdminRequestSpec().get("/categories");
+                        if (listRes.getStatusCode() == 200) {
+                            for (int idx = 0; ; idx++) {
+                                try {
+                                    String name = listRes.jsonPath().getString("[" + idx + "].name");
+                                    if (paginationParentName.equals(name)) {
+                                        parentId = listRes.jsonPath().getInt("[" + idx + "].id");
+                                        break;
+                                    }
+                                } catch (Exception e) { break; }
+                            }
+                        }
+                    }
+                    if (parentId <= 0) return;
+                    Response subRes = ApiBase.getAdminRequestSpec()
+                            .body("{\"name\":\"" + paginationSubName + "\",\"parent\":{\"id\":" + parentId + "}}")
+                            .post("/categories");
+                    if (subRes.getStatusCode() == 201 || subRes.getStatusCode() == 200) {
+                        created[0] = true;
+                        System.out.println("✅ Created sub-category via API: " + paginationParentName + " / " + paginationSubName);
+                        System.out.flush();
+                    }
+                } catch (Exception e) {
+                    System.out.println("⚠️ Could not create pagination category via API: " + e.getMessage());
+                    System.out.flush();
+                }
+            });
+            future.get(12, TimeUnit.SECONDS);
+        } catch (java.util.concurrent.TimeoutException e) {
+            System.out.println("⚠️ API timeout (12s) - using first available category/sub in dropdown.");
+            System.out.flush();
+        } catch (Exception e) {
+            System.out.println("⚠️ Could not create pagination category: " + e.getMessage());
+            System.out.flush();
+        } finally {
+            executor.shutdownNow();
+        }
+        System.out.println("[TC_UI_ADMIN_31] Proceeding to add plants...");
+        System.out.flush();
+        return created[0];
+    }
+
     // ---------- Pagination (TC_UI_ADMIN_31) ----------
     @Given("plants exist more than {int}")
     public void plants_exist_more_than(int count) {
@@ -77,6 +144,9 @@ public class PlantsSteps {
         if (currentCount <= count) {
             System.out.println(
                     "⚠️ Plant count " + currentCount + " <= " + count + ". Adding plants to trigger pagination.");
+            System.out.flush();
+
+            boolean useApiCategory = ensurePaginationCategoryAndSubCategory();
 
             int needed = (count + 5) - currentCount; // add extra to be safe
 
@@ -94,20 +164,27 @@ public class PlantsSteps {
                 // Wait until add form is visible
                 wait10().until(d -> d.getCurrentUrl().contains("/ui/plants/add") || d.getCurrentUrl().contains("/add"));
 
+                refreshPages();
+
                 String name = "P" + (System.currentTimeMillis() % 100000) + "_" + i;
 
                 plantFormPage.enterPlantName(name);
                 plantFormPage.enterPrice("20"); // Using different price just in case
                 plantFormPage.enterQuantity("100");
-                plantFormPage.selectCategory("Indoor");
-                plantFormPage.selectSubCategory("Cacti");
+                if (useApiCategory) {
+                    plantFormPage.selectCategory(paginationParentName);
+                    plantFormPage.selectSubCategory(paginationSubName);
+                } else {
+                    plantFormPage.selectFirstAvailableCategory();
+                    plantFormPage.selectFirstAvailableSubCategory();
+                }
                 plantFormPage.clickSave();
 
                 // Wait until we are back in plants list OR validation error shows
                 try {
                     new WebDriverWait(driver, Duration.ofSeconds(5)).until(
                             d -> d.getCurrentUrl().contains("/ui/plants") && !d.getCurrentUrl().contains("/add"));
-                } catch (TimeoutException te) {
+                } catch (org.openqa.selenium.TimeoutException te) {
                     if (plantFormPage.isAnyValidationErrorDisplayed()) {
                         System.out.println("❌ Validation error occurred during pagination setup! Name: " + name
                                 + " Error: " + plantFormPage.getAnyValidationErrorText());
