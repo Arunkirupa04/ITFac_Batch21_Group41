@@ -14,9 +14,10 @@ Feature: User Authentication and Readonly Access
   @TC_API_USER_02
   Scenario: Get Existing Category - User
     Given user is logged in with JWT
-    When user sends GET request to "/api/categories/1"
+    And an existing category is available for user
+    When user sends GET request to the existing category
     Then response code should be 200
-    And response JSON should contain "id":1
+    And response JSON should contain the existing category id
 
   @TC_API_USER_03
   Scenario: Unauthorized Access without JWT
@@ -26,7 +27,8 @@ Feature: User Authentication and Readonly Access
   @TC_API_USER_04
   Scenario: Update Forbidden - User
     Given user is logged in with JWT
-    When user sends PUT request to "/api/categories/1" with body:
+    And an existing category is available for user
+    When user sends PUT request to the existing category with body:
       """
       {
         "name": "Try Update"

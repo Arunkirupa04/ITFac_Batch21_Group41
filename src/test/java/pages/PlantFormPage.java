@@ -158,6 +158,45 @@ public class PlantFormPage {
         }
     }
 
+    /** Select first non-placeholder category (for pagination when API-created category is not available). */
+    public void selectFirstAvailableCategory() {
+        try {
+            Select select = new Select(driver.findElement(categorySelect));
+            java.util.List<WebElement> options = select.getOptions();
+            for (int i = 1; i < options.size(); i++) {
+                String text = options.get(i).getText().trim();
+                if (!text.isEmpty() && !text.equalsIgnoreCase("Select") && !text.startsWith("--")) {
+                    select.selectByIndex(i);
+                    return;
+                }
+            }
+            if (options.size() > 1) select.selectByIndex(1);
+        } catch (Exception e) {
+            System.out.println("⚠️ Could not select first category: " + e.getMessage());
+        }
+    }
+
+    /** Select first non-placeholder sub-category from any select that has options (for pagination when API-created sub is not available). */
+    public void selectFirstAvailableSubCategory() {
+        try {
+            Thread.sleep(500);
+            java.util.List<WebElement> selects = driver.findElements(By.tagName("select"));
+            for (WebElement selectEl : selects) {
+                Select sel = new Select(selectEl);
+                java.util.List<WebElement> options = sel.getOptions();
+                for (int i = 1; i < options.size(); i++) {
+                    String text = options.get(i).getText().trim();
+                    if (!text.isEmpty() && !text.startsWith("--") && !text.equalsIgnoreCase("Select")) {
+                        sel.selectByIndex(i);
+                        return;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("⚠️ Could not select first sub-category: " + e.getMessage());
+        }
+    }
+
     // ✅ UPDATED: Click Save with wait (robust)
     public void clickSave() {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));

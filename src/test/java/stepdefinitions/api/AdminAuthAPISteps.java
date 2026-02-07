@@ -2,6 +2,7 @@ package stepdefinitions.api;
 
 import io.cucumber.java.en.*;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
@@ -64,5 +65,38 @@ public class AdminAuthAPISteps extends BaseAPISteps {
     @When("admin sends GET request to {string}")
     public void admin_sends_get_request(String endpoint) {
         response = request.get(endpoint);
+    }
+
+    @Given("a category exists for admin retrieval")
+    public void a_category_exists_for_admin_retrieval() {
+        // Use short name (API may enforce 3–10 chars, same as AdminCategoryAPISteps); fallback to first existing if create returns 400
+        String name = "Adm" + (System.currentTimeMillis() % 10000);
+        Response createRes = request.body("{\"name\":\"" + name + "\"}").post("/api/categories");
+        if (createRes.getStatusCode() == 201 || createRes.getStatusCode() == 200) {
+            categoryIdForAdminRetrieval = createRes.jsonPath().getInt("id");
+        } else {
+            // Fallback: use first category from GET /api/categories (don't rely on id=1)
+            Response listRes = request.get("/api/categories");
+            if (listRes.getStatusCode() == 200) {
+                java.util.List<Integer> ids = listRes.jsonPath().getList("id");
+                if (ids != null && !ids.isEmpty()) {
+                    categoryIdForAdminRetrieval = ids.get(0);
+                } else {
+                    throw new AssertionError("Failed to create category and no categories from GET /api/categories. Create status: " + createRes.getStatusCode());
+                }
+            } else {
+                throw new AssertionError("Failed to create category for TC_API_ADMIN_07: " + createRes.getStatusCode());
+            }
+        }
+    }
+
+    @When("admin sends GET request to retrieve that category")
+    public void admin_sends_get_request_to_retrieve_that_category() {
+        response = request.get("/api/categories/" + categoryIdForAdminRetrieval);
+    }
+
+    @And("response JSON should contain the retrieved category id")
+    public void response_json_should_contain_retrieved_category_id() {
+        response.then().body("id", equalTo(categoryIdForAdminRetrieval));
     }
 }

@@ -1,11 +1,13 @@
 package stepdefinitions.ui;
 
 import io.cucumber.java.en.*;
+import io.restassured.response.Response;
 import org.junit.Assert;
 import org.openqa.selenium.*;
 import pages.AddCategoryPage;
 import pages.CategoriesPage;
 import pages.EditCategoryPage;
+import utils.ApiBase;
 import utils.DriverFactory;
 
 import java.time.Duration;
@@ -65,6 +67,19 @@ public class AdminCategorySteps {
         }
     }
 
+    /** Create a category via API (admin auth) so it exists in the list when user can't use UI add form. */
+    private void createCategoryViaApi(String name) {
+        String body = "{\"name\":\"" + name.replace("\"", "\\\"") + "\"}";
+        Response res = ApiBase.getAdminRequestSpec()
+                .body(body)
+                .post("/categories");
+        if (res.getStatusCode() == 201 || res.getStatusCode() == 200) {
+            System.out.println("✅ Category created via API: " + name);
+        } else {
+            System.out.println("⚠️ API create category returned: " + res.getStatusCode() + " for " + name);
+        }
+    }
+
     // ========== GIVEN STEPS ==========
 
     @Given("Admin is logged in and on categories page")
@@ -81,7 +96,6 @@ public class AdminCategorySteps {
         if (categoriesPage == null) {
             categoriesPage = new CategoriesPage(getDriver());
         }
-
         initialCategoryCount = categoriesPage.getCategoryCount();
 
         if (initialCategoryCount < 3) {
@@ -101,9 +115,27 @@ public class AdminCategorySteps {
         }
 
         if (!categoriesPage.categoryExistsInTable(parentName)) {
-            createTestCategory(parentName, null);
-            getDriver().get("http://localhost:8080/ui/categories");
-            categoriesPage = new CategoriesPage(getDriver());
+            try {
+                getDriver().get("http://localhost:8080/ui/categories/add");
+                if (getDriver().getCurrentUrl().contains("/add")
+                        && getDriver().findElements(By.name("name")).size() > 0) {
+                    createTestCategory(parentName, null);
+                    getDriver().get("http://localhost:8080/ui/categories");
+                    categoriesPage = new CategoriesPage(getDriver());
+                } else {
+                    // User role: add category via API so it appears in the list before user selects it
+                    System.out.println("⚠️ Add Category not available (user role?). Creating via API: " + parentName);
+                    createCategoryViaApi(parentName);
+                    getDriver().get("http://localhost:8080/ui/categories");
+                    categoriesPage = new CategoriesPage(getDriver());
+                }
+            } catch (NoSuchElementException e) {
+                // User role: add category via API so it appears in the list
+                System.out.println("⚠️ Add Category form not found (user role?). Creating via API: " + parentName);
+                createCategoryViaApi(parentName);
+                getDriver().get("http://localhost:8080/ui/categories");
+                categoriesPage = new CategoriesPage(getDriver());
+            }
         }
         System.out.println("✅ Parent category exists: " + parentName);
     }

@@ -49,6 +49,7 @@ Feature: Admin Authentication and Authorization APIs
   @TC_API_ADMIN_07
   Scenario: Retrieve existing category by ID as Admin
     Given admin is logged in with JWT
-    When admin sends GET request to "/api/categories/1"
+    And a category exists for admin retrieval
+    When admin sends GET request to retrieve that category
     Then response code should be 200
-    And response JSON should contain "id":1
+    And response JSON should contain the retrieved category id

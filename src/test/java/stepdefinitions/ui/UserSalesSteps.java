@@ -42,8 +42,12 @@ public class UserSalesSteps {
             getDriver().findElement(By.cssSelector("button[type='submit']")).click();
 
             // Wait for redirect away from login page
-            new WebDriverWait(getDriver(), Duration.ofSeconds(10))
-                    .until(ExpectedConditions.not(ExpectedConditions.urlContains("/ui/login")));
+            try {
+                new WebDriverWait(getDriver(), Duration.ofSeconds(10))
+                        .until(ExpectedConditions.not(ExpectedConditions.urlContains("/ui/login")));
+            } catch (org.openqa.selenium.TimeoutException e) {
+                throw new AssertionError("User login failed (testuser/test123). Ensure this user exists in the app. Current URL: " + getDriver().getCurrentUrl(), e);
+            }
         }
     }
 

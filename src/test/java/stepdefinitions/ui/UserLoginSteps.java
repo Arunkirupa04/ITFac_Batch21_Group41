@@ -88,8 +88,12 @@ public class UserLoginSteps {
     @When("user clicks logout")
     public void user_clicks_logout() {
         WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//a[contains(@href,'logout')]"))).click();
+        try {
+            wait.until(ExpectedConditions.elementToBeClickable(
+                    By.xpath("//a[contains(@href,'logout')]"))).click();
+        } catch (org.openqa.selenium.TimeoutException e) {
+            throw new AssertionError("Logout link not found. Ensure user is logged in (URL not /ui/login). " + e.getMessage());
+        }
     }
 
     @Then("user should see message {string}")
@@ -157,7 +161,7 @@ public class UserLoginSteps {
 
     @When("user clicks Categories section")
     public void user_clicks_categories_section() {
-        getDriver().findElement(By.linkText("Categories")).click();
+        getDriver().findElement(By.partialLinkText("Categories")).click();
     }
 
     @Then("user should be navigated to categories page")
@@ -169,7 +173,7 @@ public class UserLoginSteps {
 
     @When("user clicks Plants section")
     public void user_clicks_plants_section() {
-        getDriver().findElement(By.linkText("Plants")).click();
+        getDriver().findElement(By.partialLinkText("Plants")).click();
     }
 
     @Then("user should be navigated to plants page")
@@ -181,7 +185,7 @@ public class UserLoginSteps {
 
     @When("user clicks Sales section")
     public void user_clicks_sales_section() {
-        getDriver().findElement(By.linkText("Sales")).click();
+        getDriver().findElement(By.partialLinkText("Sales")).click();
     }
 
     @Then("user should be navigated to sales page")

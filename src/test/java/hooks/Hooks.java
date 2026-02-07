@@ -2,9 +2,16 @@ package hooks;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import utils.DbCleanHelper;
 import utils.DriverFactory;
 
 public class Hooks {
+
+    /** Runs once before the first scenario; DB clean is optional (see db.properties, db.enabled=false by default). */
+    @Before(order = -1000)
+    public void runDbCleanOnceBeforeSuite() {
+        DbCleanHelper.runOnce();
+    }
 
     @Before("@ui")
     public void setupUI() {
