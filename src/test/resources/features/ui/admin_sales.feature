@@ -12,30 +12,41 @@ Feature: Admin Sales Page Verification
     And sales data table should be displayed
     And pagination controls should be visible
 
-  @TC_UI_ADMIN_55
-  Scenario: Sorting Sales by Plant Name
-    Given the admin is viewing the sales list
-    When admin clicks on "Plant" column header
-    Then sales should be sorted alphabetically by plant name
+#  @TC_UI_ADMIN_55
+#  Scenario: Sorting Sales by Plant Name
+#    Given the admin is viewing the sales list
+#    When admin clicks on "Plant" column header
+#    Then sales should be sorted alphabetically by plant name
+#
+#  @TC_UI_ADMIN_56
+#  Scenario: Sorting Sales by Quantity
+#    Given the admin is viewing the sales list
+#    When admin clicks on "Quantity" column header
+#    Then sales should be sorted by quantity in ascending order
+#
+#  @TC_UI_ADMIN_57
+#  Scenario: Sorting Sales by Total Price
+#    Given the admin is viewing the sales list
+#    When admin clicks on "Total Price" column header
+#    Then sales should be sorted by total price in ascending order
+#
+#  @TC_UI_ADMIN_58
+#  Scenario: Sorting Sales by Sold Date
+#    Given the admin is viewing the sales list
+#    When admin clicks on "Sold At" column header
+#    Then sales should be sorted by date in ascending order
 
-  @TC_UI_ADMIN_56
-  Scenario: Sorting Sales by Quantity
+  @TC_UI_ADMIN_55 @TC_UI_ADMIN_56 @TC_UI_ADMIN_57 @TC_UI_ADMIN_58
+  Scenario Outline: Sorting Sales by column
     Given the admin is viewing the sales list
-    When admin clicks on "Quantity" column header
-    Then sales should be sorted by quantity in ascending order
-
-  @TC_UI_ADMIN_57
-  Scenario: Sorting Sales by Total Price
-    Given the admin is viewing the sales list
-    When admin clicks on "Total Price" column header
-    Then sales should be sorted by total price in ascending order
-
-  @TC_UI_ADMIN_58
-  Scenario: Sorting Sales by Sold Date
-    Given the admin is viewing the sales list
-    When admin clicks on "Sold At" column header
-    Then sales should be sorted by date in ascending order
-
+    When admin clicks on "<column>" column header
+    Then sales should be sorted by <description>
+    Examples:
+      | column      | description              |
+      | Plant       | plant name alphabetically|
+      | Quantity    | quantity in ascending order|
+      | Total Price | total price in ascending order|
+      | Sold At     | date in ascending order |
   @TC_UI_ADMIN_59
   Scenario: Pagination Next Page Navigation
     Given the admin is viewing the sales list
